@@ -13,10 +13,15 @@ const shade = (hex, n) => {
 // Format: [sourceX, sourceY] in pixels within the spritesheet.
 // The grass tileset uses autotile blocks (4 cols × 6 rows per terrain).
 // Inner fill tiles (no edges) are at offset (1,2) within each block.
-const GRASS_TILES = [
-  [16, 32], // variant 1: inner fill from first autotile block
-  [32, 32], // variant 2
+// Small decorations from props.png to sprinkle on grass tiles
+const GRASS_DECOR = [
+  [0, 0], // grass tuft 1
+  [16, 0], // grass tuft 2
+  [32, 0], // grass tuft 3
+  [48, 0], // small plant
 ];
+// Simple hash to deterministically pick which tiles get decoration
+const tileHash = (x, y) => ((x * 2654435761) ^ (y * 2246822519)) >>> 0;
 // Tilled soil inner fill tile
 const PATH_TILE = [16, 16];
 // Water animation: 4 frames from the water tileset.
@@ -40,43 +45,31 @@ export function drawTile(ctx, type, x, y, tick) {
   const px = x * TILE_SIZE,
     py = y * TILE_SIZE;
 
-  // Always fill a base grass color first (covers any sprite transparency)
-  ctx.fillStyle = (x + y) % 2 ? "#5b8c3e" : "#528536";
+  // Solid green grass base for all tiles
+  ctx.fillStyle = "#8DBA64";
   ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
   if (type === TILE.GRASS) {
-    const gt = SPRITES.grassTiles;
-    if (gt?.complete) {
-      const [sx, sy] = GRASS_TILES[(x + y) % 2];
-      ctx.drawImage(
-        gt,
-        sx,
-        sy,
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
+    // Sprinkle small props decorations on ~20% of grass tiles
+    const h = tileHash(x, y);
+    if (h % 5 === 0) {
+      const pt = SPRITES.propsTiles;
+      if (pt?.complete) {
+        const [sx, sy] = GRASS_DECOR[h % GRASS_DECOR.length];
+        ctx.drawImage(
+          pt,
+          sx,
+          sy,
+          TILE_SIZE,
+          TILE_SIZE,
+          px,
+          py,
+          TILE_SIZE,
+          TILE_SIZE,
+        );
+      }
     }
   } else if (type === TILE.FLOWER) {
-    // Draw grass base from tileset
-    const gt = SPRITES.grassTiles;
-    if (gt?.complete) {
-      const [sx, sy] = GRASS_TILES[(x + y) % 2];
-      ctx.drawImage(
-        gt,
-        sx,
-        sy,
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
-    }
     // Overlay flower decoration from props sheet
     const pt = SPRITES.propsTiles;
     if (pt?.complete) {
@@ -130,22 +123,6 @@ export function drawTile(ctx, type, x, y, tick) {
       );
     }
   } else if (type === TILE.TREE) {
-    // Draw grass texture under the tree
-    const gt = SPRITES.grassTiles;
-    if (gt?.complete) {
-      const [sx, sy] = GRASS_TILES[(x + y) % 2];
-      ctx.drawImage(
-        gt,
-        sx,
-        sy,
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
-    }
     // Overlay mahogany tree sprite
     const mt = SPRITES.mahoganyTreeTiles;
     if (mt?.complete) {
@@ -167,7 +144,6 @@ export function drawTile(ctx, type, x, y, tick) {
       );
     }
   } else if (type === TILE.FENCE) {
-    // Grass base already drawn; overlay fence from fence sheet
     const ft = SPRITES.fenceTiles;
     if (ft?.complete) {
       const [sx, sy] = FENCE_TILE;

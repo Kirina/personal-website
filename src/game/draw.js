@@ -30,9 +30,11 @@ const WATER_FRAMES = [
 // Fence tile from fence-wood sheet (horizontal rail segment)
 const FENCE_TILE = [16, 32];
 // Flower position in ALL props seasons sheet (small flower cluster)
-const FLOWER_SRC = [0, 0];
-// Tree position in ALL props seasons sheet (small tree/bush, 16×16)
-const TREE_SRC = [0, 16];
+const FLOWER_SRC = [16 * 18, 16 * 3];
+// Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
+const TREE_SRC = [16 * 4, 0];
+const TREE_SRC_WIDTH = 32;
+const TREE_SRC_HEIGHT = 48;
 
 export function drawTile(ctx, type, x, y, tick) {
   const px = x * TILE_SIZE,
@@ -126,23 +128,16 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-    } else {
-      ctx.fillStyle = "#3d7dca";
-      ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-      const w = Math.sin(tick * 0.06 + x * 1.5 + y) * 2;
-      ctx.fillStyle = "#5a9de0";
-      ctx.fillRect(px + 2 + w, py + 4, 5, 1);
-      ctx.fillRect(px + 7 - w, py + 10, 5, 1);
     }
   } else if (type === TILE.TREE) {
-    // Grass base already drawn; overlay tree from props sheet
-    const pt = SPRITES.propsTiles;
-    if (pt?.complete) {
-      const [tx, ty] = TREE_SRC;
+    // Draw grass texture under the tree
+    const gt = SPRITES.grassTiles;
+    if (gt?.complete) {
+      const [sx, sy] = GRASS_TILES[(x + y) % 2];
       ctx.drawImage(
-        pt,
-        tx,
-        ty,
+        gt,
+        sx,
+        sy,
         TILE_SIZE,
         TILE_SIZE,
         px,
@@ -150,13 +145,26 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-    } else {
-      ctx.fillStyle = "#6b4226";
-      ctx.fillRect(px + 6, py + 9, 4, 7);
-      ctx.fillStyle = "#2d7a1e";
-      ctx.fillRect(px + 2, py + 2, 12, 9);
-      ctx.fillStyle = "#3d8a2e";
-      ctx.fillRect(px + 4, py + 1, 8, 4);
+    }
+    // Overlay mahogany tree sprite
+    const mt = SPRITES.mahoganyTreeTiles;
+    if (mt?.complete) {
+      const [tx, ty] = TREE_SRC;
+      // Draw at full size (2×3 tiles), anchored so the bottom-center
+      // aligns with this tile — tree extends 2 tiles up and 1 tile right
+      const destW = TREE_SRC_WIDTH;
+      const destH = TREE_SRC_HEIGHT;
+      ctx.drawImage(
+        mt,
+        tx,
+        ty,
+        TREE_SRC_WIDTH,
+        TREE_SRC_HEIGHT,
+        px - TILE_SIZE / 2,
+        py - destH + TILE_SIZE,
+        destW,
+        destH,
+      );
     }
   } else if (type === TILE.FENCE) {
     // Grass base already drawn; overlay fence from fence sheet
@@ -174,13 +182,6 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-    } else {
-      ctx.fillStyle = "#c8a05a";
-      ctx.fillRect(px, py + 5, TILE_SIZE, 2);
-      ctx.fillRect(px, py + 10, TILE_SIZE, 2);
-      ctx.fillStyle = "#a08040";
-      ctx.fillRect(px + 1, py + 3, 2, 11);
-      ctx.fillRect(px + 13, py + 3, 2, 11);
     }
   }
 }
@@ -199,40 +200,6 @@ export function drawBuilding(ctx, b) {
     // Draw the pre-composed building image, scaled to fit the building area.
     // Offset upward by T to allow roof overhang above the collision zone.
     ctx.drawImage(img, px, py - TILE_SIZE, pw, ph + TILE_SIZE);
-  } else {
-    // Fallback: procedural building (original style)
-    ctx.fillStyle = "rgba(0,0,0,0.12)";
-    ctx.fillRect(px + 4, py + 4, pw, ph);
-    ctx.fillStyle = b.wall;
-    ctx.fillRect(px, py + TILE_SIZE, pw, ph - TILE_SIZE);
-    ctx.fillStyle = "rgba(0,0,0,0.08)";
-    ctx.fillRect(px, py + TILE_SIZE, pw, 2);
-    ctx.fillRect(px, py + TILE_SIZE, 2, ph - TILE_SIZE);
-    ctx.fillRect(px + pw - 2, py + TILE_SIZE, 2, ph - TILE_SIZE);
-    ctx.fillStyle = b.roof;
-    ctx.fillRect(px - 3, py - 2, pw + 6, TILE_SIZE + 4);
-    ctx.fillStyle = shade(b.roof, -25);
-    ctx.fillRect(px - 3, py - 2, pw + 6, 4);
-    ctx.fillStyle = shade(b.roof, 20);
-    ctx.fillRect(px - 1, py + TILE_SIZE - 1, pw + 2, 3);
-    ctx.fillStyle = "#5a3a1a";
-    ctx.fillRect(px + pw / 2 - 5, py + ph - 14, 10, 14);
-    ctx.fillStyle = "#7a5a3a";
-    ctx.fillRect(px + pw / 2 - 4, py + ph - 13, 8, 12);
-    ctx.fillStyle = "#ee4";
-    ctx.fillRect(px + pw / 2 + 1, py + ph - 8, 2, 2);
-    const wy = py + TILE_SIZE + 8;
-    ctx.fillStyle = "#8ce";
-    ctx.fillRect(px + 6, wy, 10, 8);
-    ctx.fillRect(px + pw - 16, wy, 10, 8);
-    ctx.fillStyle = "#bef";
-    ctx.fillRect(px + 7, wy + 1, 4, 3);
-    ctx.fillRect(px + pw - 15, wy + 1, 4, 3);
-    ctx.fillStyle = "#543";
-    ctx.fillRect(px + 6, wy + 4, 10, 1);
-    ctx.fillRect(px + 11, wy, 1, 8);
-    ctx.fillRect(px + pw - 16, wy + 4, 10, 1);
-    ctx.fillRect(px + pw - 11, wy, 1, 8);
   }
 
   // Name label
@@ -270,25 +237,6 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
         CHAR_SIZE,
       );
       ctx.restore();
-    } else {
-      // Fallback procedural cat
-      const w = frame % 2;
-      ctx.fillStyle = "rgba(0,0,0,0.15)";
-      ctx.fillRect(x + 3, y + 13, 10, 2);
-      ctx.fillStyle = "#f90";
-      ctx.fillRect(x + 3, y + 6, 10, 6);
-      ctx.fillRect(x + 5, y + 3, 6, 5);
-      ctx.fillRect(x + 4, y + 1, 3, 3);
-      ctx.fillRect(x + 9, y + 1, 3, 3);
-      ctx.fillStyle = "#000";
-      ctx.fillRect(x + 6, y + 5, 1, 2);
-      ctx.fillRect(x + 9, y + 5, 1, 2);
-      ctx.fillStyle = "#f88";
-      ctx.fillRect(x + 7, y + 7, 2, 1);
-      ctx.fillStyle = "#f90";
-      ctx.fillRect(x + 12, y + 5 + w, 3, 2);
-      ctx.fillRect(x + 4, y + 12, 2, 2 + w);
-      ctx.fillRect(x + 10, y + 12, 2, 2 + (1 - w));
     }
     return;
   }
@@ -342,55 +290,7 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
       );
     }
     ctx.restore();
-  } else {
-    // Fallback procedural character
-    const w = frame % 2;
-    ctx.fillStyle = "rgba(0,0,0,0.15)";
-    ctx.fillRect(x + 3, y + 14, 10, 2);
-    ctx.fillStyle = "#346";
-    if (w) {
-      ctx.fillRect(x + 4, y + 11, 3, 5);
-      ctx.fillRect(x + 9, y + 12, 3, 4);
-    } else {
-      ctx.fillRect(x + 4, y + 11, 3, 5);
-      ctx.fillRect(x + 9, y + 11, 3, 5);
-    }
-    ctx.fillStyle = "#222";
-    ctx.fillRect(x + 4, y + 14, 3, 2);
-    ctx.fillRect(x + 9, y + 14, 3, 2);
-    ctx.fillStyle = "#4a7";
-    ctx.fillRect(x + 3, y + 6, 10, 6);
-    ctx.fillRect(x + 1, y + 7 + (w ? 1 : 0), 3, 4);
-    ctx.fillRect(x + 12, y + 7 + (w ? 0 : 1), 3, 4);
-    ctx.fillStyle = "#f5c7a1";
-    ctx.fillRect(x + 4, y + 1, 8, 6);
-    ctx.fillStyle = "#543";
-    ctx.fillRect(x + 3, y, 10, 3);
-    if (dir === 0) {
-      ctx.fillStyle = "#000";
-      ctx.fillRect(x + 5, y + 3, 2, 2);
-      ctx.fillRect(x + 9, y + 3, 2, 2);
-    }
   }
-}
-
-export function drawFountain(ctx, tick) {
-  const cx = 19 * TILE_SIZE + 8,
-    cy = 12 * TILE_SIZE + 8;
-  ctx.fillStyle = "#888";
-  ctx.fillRect(cx - 10, cy - 8, 20, 16);
-  ctx.fillStyle = "#999";
-  ctx.fillRect(cx - 8, cy - 6, 16, 12);
-  ctx.fillStyle = "#4a9de8";
-  ctx.fillRect(cx - 6, cy - 4, 12, 8);
-  const h = Math.sin(tick * 0.08) * 2;
-  ctx.fillStyle = "#8cf";
-  ctx.fillRect(cx - 1, cy - 8 - 4 + h, 2, 5);
-  ctx.fillRect(cx - 3, cy - 8 - 2 + h, 1, 2);
-  ctx.fillRect(cx + 2, cy - 8 - 2 + h, 1, 2);
-  ctx.fillStyle = "#5ab";
-  ctx.fillRect(cx - 5 + Math.sin(tick * 0.05) * 1, cy - 2, 4, 1);
-  ctx.fillRect(cx + 2 - Math.sin(tick * 0.05) * 1, cy + 2, 3, 1);
 }
 
 // 9-slice dialog background using the dialogue box sprite.

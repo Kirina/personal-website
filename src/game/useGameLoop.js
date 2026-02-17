@@ -10,13 +10,7 @@ import {
   VIEW_WIDTH,
 } from "./constants";
 import { BUILDINGS, NPCS } from "./data";
-import {
-  drawBuilding,
-  drawChar,
-  drawDialogBg,
-  drawFountain,
-  drawTile,
-} from "./draw";
+import { drawBuilding, drawChar, drawDialogBg, drawTile } from "./draw";
 import { MAP } from "./map";
 
 export function useGameLoop(
@@ -83,14 +77,6 @@ export function useGameLoop(
           py < (b.y + b.h) * TILE_SIZE
         )
           return true;
-      // Fountain
-      if (
-        px >= 19 * TILE_SIZE - 2 &&
-        px <= 20 * TILE_SIZE + 2 &&
-        py >= 12 * TILE_SIZE &&
-        py <= 13 * TILE_SIZE
-      )
-        return true;
       return false;
     };
     const canMove = (nx, ny) => {
@@ -212,7 +198,6 @@ export function useGameLoop(
 
       entities.forEach((e) => {
         if (e.type === "b") drawBuilding(ctx, e.data);
-        else if (e.type === "f") drawFountain(ctx, s.tick);
         else if (e.type === "n") {
           const n = e.data,
             bob = Math.sin(s.tick * 0.04 + n.x) * 1;

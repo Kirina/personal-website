@@ -433,17 +433,7 @@ function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
       const catRow = 6; // sitting idle — adjust if needed
       const col = Math.floor(frame) % 4;
       ctx.save();
-      ctx.drawImage(
-        img,
-        col * CF,
-        catRow * CF,
-        CF,
-        CF,
-        x - 8,
-        y - 16,
-        CF,
-        CF,
-      );
+      ctx.drawImage(img, col * CF, catRow * CF, CF, CF, x - 8, y - 16, CF, CF);
       ctx.restore();
     } else {
       // Fallback procedural cat
@@ -476,7 +466,8 @@ function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
   if (img?.complete) {
     // Direction → spritesheet row
     // dir: 0=down, 1=up, 2=left, 3=right
-    const dirMap = { 0: 0, 1: 2, 2: 1, 3: 1 };
+    // Sheet layout: Row 0 = Down, Row 1 = Up, Row 2 = Right
+    const dirMap = { 0: 0, 1: 1, 2: 2, 3: 2 };
     const row = dirMap[dir];
     const flipX = dir === 2; // Left = flip Right sprites
 
@@ -576,17 +567,57 @@ function drawDialogBg(ctx, x, y, w, h) {
   // Bottom-left corner
   ctx.drawImage(img, sx, sy + sh - c, c, c, x, y + h - c, c, c);
   // Bottom-right corner
-  ctx.drawImage(img, sx + sw - c, sy + sh - c, c, c, x + w - c, y + h - c, c, c);
+  ctx.drawImage(
+    img,
+    sx + sw - c,
+    sy + sh - c,
+    c,
+    c,
+    x + w - c,
+    y + h - c,
+    c,
+    c,
+  );
   // Top edge
   ctx.drawImage(img, sx + c, sy, sw - 2 * c, c, x + c, y, w - 2 * c, c);
   // Bottom edge
-  ctx.drawImage(img, sx + c, sy + sh - c, sw - 2 * c, c, x + c, y + h - c, w - 2 * c, c);
+  ctx.drawImage(
+    img,
+    sx + c,
+    sy + sh - c,
+    sw - 2 * c,
+    c,
+    x + c,
+    y + h - c,
+    w - 2 * c,
+    c,
+  );
   // Left edge
   ctx.drawImage(img, sx, sy + c, c, sh - 2 * c, x, y + c, c, h - 2 * c);
   // Right edge
-  ctx.drawImage(img, sx + sw - c, sy + c, c, sh - 2 * c, x + w - c, y + c, c, h - 2 * c);
+  ctx.drawImage(
+    img,
+    sx + sw - c,
+    sy + c,
+    c,
+    sh - 2 * c,
+    x + w - c,
+    y + c,
+    c,
+    h - 2 * c,
+  );
   // Center fill
-  ctx.drawImage(img, sx + c, sy + c, sw - 2 * c, sh - 2 * c, x + c, y + c, w - 2 * c, h - 2 * c);
+  ctx.drawImage(
+    img,
+    sx + c,
+    sy + c,
+    sw - 2 * c,
+    sh - 2 * c,
+    x + c,
+    y + c,
+    w - 2 * c,
+    h - 2 * c,
+  );
 }
 
 // === MAIN COMPONENT ===
@@ -779,10 +810,18 @@ export default function RPGPortfolio() {
       // Track if player is moving for walk animation
       const k = s.keys;
       const playerMoving =
-        k.ArrowUp || k.w || k.W ||
-        k.ArrowDown || k.s || k.S ||
-        k.ArrowLeft || k.a || k.A ||
-        k.ArrowRight || k.d || k.D;
+        k.ArrowUp ||
+        k.w ||
+        k.W ||
+        k.ArrowDown ||
+        k.s ||
+        k.S ||
+        k.ArrowLeft ||
+        k.a ||
+        k.A ||
+        k.ArrowRight ||
+        k.d ||
+        k.D;
 
       entities.forEach((e) => {
         if (e.type === "b") drawBuilding(ctx, e.data);

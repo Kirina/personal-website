@@ -26,8 +26,9 @@ loadImg("cherryTreeTiles", "/assets/tiles/cherry-tree.png");
 // Buildings (pre-composed)
 loadImg("home", "/assets/buildings/home.png");
 loadImg("workshop", "/assets/buildings/workshop.png");
-loadImg("library", "/assets/buildings/library.png");
-loadImg("garden", "/assets/buildings/garden.png");
+loadImg("oldHouse", "/assets/buildings/old-house.png");
+loadImg("trailer", "/assets/buildings/trailer.png");
+loadImg("houses", "/assets/buildings/houses.png");
 
 // Characters (32×32 per frame)
 loadImg("playerIdle", "/assets/characters/player-idle.png");

@@ -5,10 +5,10 @@ export const BUILDINGS = [
   {
     x: 3,
     y: 3,
-    w: 8,
-    h: 6,
-    name: "Home",
-    spriteKey: "home",
+    spriteWidth: 8,
+    spriteHeight: 6,
+    name: "Workshop",
+    spriteKey: "workshop",
     content: {
       title: "\u{1F3E0} About Me",
       pages: [
@@ -20,11 +20,13 @@ export const BUILDINGS = [
   },
   {
     x: 27,
-    y: 3,
-    w: 8,
-    h: 6,
-    name: "Workshop",
-    spriteKey: "workshop",
+    y: 4,
+    spriteWidth: 5,
+    spriteHeight: 8,
+    spriteX: 16 * 6,
+    spriteY: 16 * 12,
+    name: "Houses",
+    spriteKey: "houses",
     content: {
       title: "\u{1F527} Skills & Projects",
       pages: [
@@ -38,10 +40,10 @@ export const BUILDINGS = [
   {
     x: 3,
     y: 18,
-    w: 5,
-    h: 6,
-    name: "Library",
-    spriteKey: "library",
+    spriteWidth: 5,
+    spriteHeight: 6,
+    name: "Old House",
+    spriteKey: "oldHouse",
     content: {
       title: "\u{1F4DA} Education & Experience",
       pages: [
@@ -54,10 +56,12 @@ export const BUILDINGS = [
   {
     x: 28,
     y: 18,
-    w: 5,
-    h: 5,
-    name: "Garden",
-    spriteKey: "garden",
+    spriteWidth: 7,
+    spriteHeight: 5,
+    spriteX: 16 * 7,
+    spriteY: 16,
+    name: "Trailer",
+    spriteKey: "trailer",
     content: {
       title: "\u{1F33F} Hobbies & Contact",
       pages: [

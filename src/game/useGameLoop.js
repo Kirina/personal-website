@@ -79,9 +79,9 @@ export function useGameLoop(
       for (const b of BUILDINGS)
         if (
           px >= b.x * TILE_SIZE &&
-          px < (b.x + b.w) * TILE_SIZE &&
+          px < (b.x + b.spriteWidth) * TILE_SIZE &&
           py >= (b.y + 2) * TILE_SIZE &&
-          py < (b.y + b.h) * TILE_SIZE
+          py < (b.y + b.spriteHeight - 1) * TILE_SIZE
         )
           return true;
       return false;
@@ -102,8 +102,8 @@ export function useGameLoop(
       const cx = px + 8,
         cy = py + 8;
       for (const b of BUILDINGS) {
-        const dx = cx - (b.x * TILE_SIZE + (b.w * TILE_SIZE) / 2),
-          dy = cy - (b.y + b.h) * TILE_SIZE;
+        const dx = cx - (b.x * TILE_SIZE + (b.spriteWidth * TILE_SIZE) / 2),
+          dy = cy - (b.y + b.spriteHeight) * TILE_SIZE;
         if (Math.abs(dx) < 18 && dy > -4 && dy < 22) return b;
       }
       for (const n of NPCS) {
@@ -188,7 +188,7 @@ export function useGameLoop(
       const entities = [
         ...BUILDINGS.map((b) => ({
           type: "b",
-          y: (b.y + b.h) * TILE_SIZE,
+          y: (b.y + b.spriteHeight - 1) * TILE_SIZE,
           data: b,
         })),
         ...trees,

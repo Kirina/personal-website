@@ -264,17 +264,46 @@ export function drawCherryTree(ctx, x, y) {
   );
 }
 
-export function drawBuilding(ctx, b) {
-  const px = b.x * TILE_SIZE,
-    py = b.y * TILE_SIZE,
-    pw = b.w * TILE_SIZE,
-    ph = b.h * TILE_SIZE;
-  const img = SPRITES[b.spriteKey];
+export function drawBuilding(ctx, buildingData) {
+  const px = buildingData.x * TILE_SIZE,
+    py = buildingData.y * TILE_SIZE,
+    pw = buildingData.spriteWidth * TILE_SIZE,
+    ph = buildingData.spriteHeight * TILE_SIZE;
+  const img = SPRITES[buildingData.spriteKey];
 
   if (img?.complete) {
-    // Draw the pre-composed building image, scaled to fit the building area.
-    // Offset upward by T to allow roof overhang above the collision zone.
-    ctx.drawImage(img, px, py - TILE_SIZE, pw, ph + TILE_SIZE);
+    const sx = buildingData.spriteX ?? 0,
+      sy = buildingData.spriteY ?? 0;
+    if (buildingData.spriteW !== undefined) {
+      // Sprite sheet building: render at natural pixel size, bottom-anchored to ground level.
+      // spriteW/spriteH define the source crop; hitbox is defined by x/y/w/h independently.
+      const sw = buildingData.spriteW,
+        sh = buildingData.spriteH;
+      ctx.drawImage(
+        img,
+        sx,
+        sy,
+        sw,
+        sh,
+        px,
+        (buildingData.y + buildingData.spriteHeight) * TILE_SIZE - sh,
+        sw,
+        sh,
+      );
+    } else {
+      // Dedicated file: stretch to fill the tile footprint with one-tile roof overhang.
+      ctx.drawImage(
+        img,
+        sx,
+        sy,
+        pw,
+        ph + TILE_SIZE,
+        px,
+        py - TILE_SIZE,
+        pw,
+        ph + TILE_SIZE,
+      );
+    }
   }
 }
 

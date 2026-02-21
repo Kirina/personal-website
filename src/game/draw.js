@@ -43,6 +43,12 @@ const CLIFF_WATER_BOTTOM = {
   middle: [16, 16 * 5],
   right: [16 * 2, 16 * 5],
 };
+
+const BRIDGE = {
+  src: [16 * 0.5, 0],
+  width: 16 * 5,
+  height: 16 * 3.5,
+};
 // Edge & corner overlay positions [x, y] within each block — adjust to match sheet
 const EDGE_NO_BACKGROUND = {
   // Straight edges

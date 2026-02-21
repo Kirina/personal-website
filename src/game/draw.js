@@ -16,13 +16,12 @@ const GRASS_DECOR = [
 // Simple hash to deterministically pick which tiles get decoration
 const tileHash = (x, y) => ((x * 2654435761) ^ (y * 2246822519)) >>> 0;
 // Tilled soil inner fill tile
-const PATH_TILE = [16, 16];
-// Water edges from grass-water-spring.png (autotile A1 format)
-// 3 animation frames in blocks at x = 0, 96, 192 (each block 96px wide)
+const PATH_TILE = [16 * 9, 16 * 10];
+
 const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
 // Edge & corner overlay positions [x, y] within each block — adjust to match sheet
-const WATER_EDGE = {
+const GRASS_EDGE_NO_BACKGROUND = {
   // Straight edges
   top: [16 * 10, 16 * 4],
   bottom: [16 * 9, 16 * 7],
@@ -39,12 +38,8 @@ const WATER_EDGE = {
   ccvBL: [16 * 5, 16 * 6], // diagonal bottom-left is grass
   ccvBR: [16 * 6, 16 * 6], // diagonal bottom-right is grass
 };
-const isWater = (x, y) =>
-  x >= 0 &&
-  x < MAP_WIDTH &&
-  y >= 0 &&
-  y < MAP_HEIGHT &&
-  MAP[y][x] === TILE.WATER;
+const isCurrent = (x, y, Current) =>
+  x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT && MAP[y][x] === Current;
 // Fence tile from fence-wood sheet (horizontal rail segment)
 const FENCE_TILE = [16, 32];
 // Flower position in ALL props seasons sheet (small flower cluster)
@@ -53,6 +48,45 @@ const FLOWER_SRC = [16 * 18, 16 * 3];
 const TREE_SRC = [0, 16 * 3];
 const TREE_SRC_WIDTH = 16 * 2;
 const TREE_SRC_HEIGHT = 16 * 3;
+
+function drawEdges(ctx, wt, px, py, x, y, tile, edge, spriteBlockX) {
+  const draw = (edge) => {
+    const [ex, ey] = edge;
+    ctx.drawImage(
+      wt,
+      spriteBlockX + ex,
+      ey,
+      TILE_SIZE,
+      TILE_SIZE,
+      px,
+      py,
+      TILE_SIZE,
+      TILE_SIZE,
+    );
+  };
+  const t = !isCurrent(x, y - 1, tile); // non-water above
+  const b = !isCurrent(x, y + 1, tile); // non-water below
+  const l = !isCurrent(x - 1, y, tile); // non-water left
+  const r = !isCurrent(x + 1, y, tile); // non-water right
+
+  // Convex corners (two adjacent cardinal sides are non-water)
+  if (t && l) draw(edge.cvxTL);
+  if (t && r) draw(edge.cvxTR);
+  if (b && l) draw(edge.cvxBL);
+  if (b && r) draw(edge.cvxBR);
+
+  // Straight edges (only one cardinal side is non-water)
+  if (t && !l && !r) draw(edge.top);
+  if (b && !l && !r) draw(edge.bottom);
+  if (l && !t && !b) draw(edge.left);
+  if (r && !t && !b) draw(edge.right);
+
+  // Concave corners (all cardinal neighbors are water, diagonal is not)
+  if (!t && !l && !isCurrent(x - 1, y - 1, tile)) draw(edge.ccvTL);
+  if (!t && !r && !isCurrent(x + 1, y - 1, tile)) draw(edge.ccvTR);
+  if (!b && !l && !isCurrent(x - 1, y + 1, tile)) draw(edge.ccvBL);
+  if (!b && !r && !isCurrent(x + 1, y + 1, tile)) draw(edge.ccvBR);
+}
 
 export function drawTile(ctx, type, x, y, tick) {
   const px = x * TILE_SIZE,
@@ -100,7 +134,7 @@ export function drawTile(ctx, type, x, y, tick) {
       );
     }
   } else if (type === TILE.PATH) {
-    const pt = SPRITES.pathTiles;
+    const pt = SPRITES.grassTiles;
     if (pt?.complete) {
       const [sx, sy] = PATH_TILE;
       ctx.drawImage(
@@ -114,6 +148,7 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
+      drawEdges(ctx, pt, px, py, x, y, TILE.PATH, GRASS_EDGE_NO_BACKGROUND, 0);
     }
   } else if (type === TILE.WATER) {
     // Solid blue base for all water
@@ -123,45 +158,20 @@ export function drawTile(ctx, type, x, y, tick) {
     // Overlay animated edge tiles where water meets non-water
     const wt = SPRITES.waterTiles;
     if (wt?.complete) {
-      const blockX =
+      const spriteBlockX =
         (Math.floor(tick / 20) % WATER_ANIM_FRAMES) * WATER_BLOCK_W;
-      const draw = (edge) => {
-        const [ex, ey] = edge;
-        ctx.drawImage(
-          wt,
-          blockX + ex,
-          ey,
-          TILE_SIZE,
-          TILE_SIZE,
-          px,
-          py,
-          TILE_SIZE,
-          TILE_SIZE,
-        );
-      };
 
-      const t = !isWater(x, y - 1); // non-water above
-      const b = !isWater(x, y + 1); // non-water below
-      const l = !isWater(x - 1, y); // non-water left
-      const r = !isWater(x + 1, y); // non-water right
-
-      // Convex corners (two adjacent cardinal sides are non-water)
-      if (t && l) draw(WATER_EDGE.cvxTL);
-      if (t && r) draw(WATER_EDGE.cvxTR);
-      if (b && l) draw(WATER_EDGE.cvxBL);
-      if (b && r) draw(WATER_EDGE.cvxBR);
-
-      // Straight edges (only one cardinal side is non-water)
-      if (t && !l && !r) draw(WATER_EDGE.top);
-      if (b && !l && !r) draw(WATER_EDGE.bottom);
-      if (l && !t && !b) draw(WATER_EDGE.left);
-      if (r && !t && !b) draw(WATER_EDGE.right);
-
-      // Concave corners (all cardinal neighbors are water, diagonal is not)
-      if (!t && !l && !isWater(x - 1, y - 1)) draw(WATER_EDGE.ccvTL);
-      if (!t && !r && !isWater(x + 1, y - 1)) draw(WATER_EDGE.ccvTR);
-      if (!b && !l && !isWater(x - 1, y + 1)) draw(WATER_EDGE.ccvBL);
-      if (!b && !r && !isWater(x + 1, y + 1)) draw(WATER_EDGE.ccvBR);
+      drawEdges(
+        ctx,
+        wt,
+        px,
+        py,
+        x,
+        y,
+        TILE.WATER,
+        GRASS_EDGE_NO_BACKGROUND,
+        spriteBlockX,
+      );
     }
   } else if (type === TILE.TREE) {
     // Tree sprite is drawn in a separate pass (drawTree) after all tiles,

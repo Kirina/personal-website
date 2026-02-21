@@ -46,15 +46,17 @@ export const MAP = (() => {
   // ── POND ─────────────────────────────────────────────────────────────────────
   // Large scenic pond: cols 12-17, rows 4-11
   fill(range(4, 12), range(12, 18), TILE.WATER);
-  // Pond fences — west edge and south edge
+  // Pond fences — west edge, south edge, and connecting corner
   fill(range(4, 12), [11], TILE.FENCE);
   fill([12], range(12, 18), TILE.FENCE);
+  m[12][11] = TILE.FENCE; // bottom-left corner joining west + south fence
 
   // ── FARM FIELD ───────────────────────────────────────────────────────────────
   // Tilled soil east of Library: cols 9-14, rows 20-24
   fill(range(20, 25), range(9, 15), TILE.PATH);
   fill([19], range(9, 15), TILE.FENCE);
   fill(range(20, 25), [15], TILE.FENCE);
+  m[19][15] = TILE.FENCE; // top-right corner joining north + east fence
 
   // ── CHERRY BLOSSOM GROVE ─────────────────────────────────────────────────────
   // Primary grove: top-right quadrant, avoiding Workshop cols 27-34 rows 3-8

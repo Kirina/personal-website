@@ -44,8 +44,8 @@ const isCurrent = (x, y, Current) =>
 const FENCE = {
   horizontal: [16, 16 * 2],
   vertical: [0, 16],
-  left_end: [16 * 2, 16],
-  right_end: [16 * 2, 16],
+  left_end: [16, 16 * 3],
+  right_end: [16 * 2, 16 * 3],
   left_top_corner: [0, 0],
   right_top_corner: [16 * 2, 0],
   left_bottom_corner: [0, 16 * 2],
@@ -197,17 +197,19 @@ export function drawTile(ctx, type, x, y, tick) {
         ny >= 0 &&
         ny < MAP_HEIGHT &&
         MAP[ny][nx] === TILE.FENCE;
-      const L = isF(x - 1, y), R = isF(x + 1, y);
-      const U = isF(x, y - 1), D = isF(x, y + 1);
+      const L = isF(x - 1, y),
+        R = isF(x + 1, y);
+      const U = isF(x, y - 1),
+        D = isF(x, y + 1);
       let src;
-      if      (!L && R && !U && D) src = FENCE.left_top_corner;
+      if (!L && R && !U && D) src = FENCE.left_top_corner;
       else if (L && !R && !U && D) src = FENCE.right_top_corner;
       else if (!L && R && U && !D) src = FENCE.left_bottom_corner;
       else if (L && !R && U && !D) src = FENCE.right_bottom_corner;
       else if (!L && R && !U && !D) src = FENCE.left_end;
       else if (L && !R && !U && !D) src = FENCE.right_end;
-      else if (L || R)              src = FENCE.horizontal;
-      else                          src = FENCE.vertical;
+      else if (L || R) src = FENCE.horizontal;
+      else src = FENCE.vertical;
       const [sx, sy] = src;
       ctx.drawImage(
         ft,

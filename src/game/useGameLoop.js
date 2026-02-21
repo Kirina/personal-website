@@ -225,10 +225,6 @@ export function useGameLoop(
             false,
             n.isCat,
           );
-          ctx.fillStyle = "#fff";
-          ctx.font = "6px monospace";
-          ctx.textAlign = "center";
-          ctx.fillText(n.name, n.x + 8, n.y - 4 + bob);
         } else {
           drawChar(
             ctx,

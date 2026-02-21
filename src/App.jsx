@@ -67,28 +67,15 @@ export default function RPGPortfolio() {
   return (
     <div
       style={{
-        width: "100%",
-        height: "100vh",
+        position: "fixed",
+        inset: 0,
         background: "#1a1a2e",
         display: "flex",
-        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: "monospace",
         overflow: "hidden",
-        position: "relative",
       }}
     >
-      <div
-        style={{
-          color: "#fff8",
-          fontSize: 13,
-          letterSpacing: 2,
-          marginBottom: 6,
-        }}
-      >
-        {"\u2728"} PORTFOLIO TOWN {"\u2728"}
-      </div>
       <div style={{ position: "relative" }}>
         <canvas
           ref={canvasRef}
@@ -96,10 +83,9 @@ export default function RPGPortfolio() {
           height={VIEW_HEIGHT * TILE_SIZE * SCALE}
           style={{
             imageRendering: "pixelated",
-            borderRadius: 4,
-            border: "3px solid #333",
-            maxWidth: "95vw",
-            maxHeight: "70vh",
+            maxWidth: "100vw",
+            maxHeight: "100vh",
+            display: "block",
           }}
         />
         {prompt && !dialog && (
@@ -134,13 +120,6 @@ export default function RPGPortfolio() {
             }}
           />
         )}
-      </div>
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 8 }}
-      >
-        <div style={{ color: "#666", fontSize: 11 }}>
-          WASD / Arrows to move &middot; SPACE to interact
-        </div>
       </div>
       {/* Touch Controls */}
       <div

@@ -54,13 +54,13 @@ const FENCE = {
 // Flower position in ALL props seasons sheet (small flower cluster)
 const FLOWER_SRC = [16 * 18, 16 * 3];
 // Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
-const TREE_SRC = [0, 16 * 3];
-const TREE_SRC_WIDTH = 16 * 2;
-const TREE_SRC_HEIGHT = 16 * 3;
+const TREE = { src: [0, 16 * 3], width: 16 * 2, height: 16 * 3 };
 // Cherry tree: full-grown spring bloom, frame 4 (x=128) in the 14-frame growth sheet
-const CHERRY_TREE_SRC = [16 * 8, 0];
-const CHERRY_TREE_SRC_WIDTH = 16 * 2;
-const CHERRY_TREE_SRC_HEIGHT = 16 * 3;
+const CHERRY_TREE = {
+  src: [16 * 8, 0],
+  width: 16 * 2,
+  height: 16 * 3,
+};
 
 function drawEdges(ctx, wt, px, py, x, y, tile, edge, spriteBlockX) {
   const draw = (edge) => {
@@ -235,14 +235,14 @@ export function drawTree(ctx, x, y) {
   const py = y * TILE_SIZE;
   ctx.drawImage(
     mt,
-    TREE_SRC[0],
-    TREE_SRC[1],
-    TREE_SRC_WIDTH,
-    TREE_SRC_HEIGHT,
+    TREE.src[0],
+    TREE.src[1],
+    TREE.width,
+    TREE.height,
     px - TILE_SIZE / 2,
-    py - TREE_SRC_HEIGHT + TILE_SIZE,
-    TREE_SRC_WIDTH,
-    TREE_SRC_HEIGHT,
+    py - TREE.height + TILE_SIZE,
+    TREE.width,
+    TREE.height,
   );
 }
 
@@ -253,14 +253,14 @@ export function drawCherryTree(ctx, x, y) {
   const py = y * TILE_SIZE;
   ctx.drawImage(
     ct,
-    CHERRY_TREE_SRC[0],
-    CHERRY_TREE_SRC[1],
-    CHERRY_TREE_SRC_WIDTH,
-    CHERRY_TREE_SRC_HEIGHT,
+    CHERRY_TREE.src[0],
+    CHERRY_TREE.src[1],
+    CHERRY_TREE.width,
+    CHERRY_TREE.height,
     px - TILE_SIZE / 2,
-    py - CHERRY_TREE_SRC_HEIGHT + TILE_SIZE,
-    CHERRY_TREE_SRC_WIDTH,
-    CHERRY_TREE_SRC_HEIGHT,
+    py - CHERRY_TREE.height + TILE_SIZE,
+    CHERRY_TREE.width,
+    CHERRY_TREE.height,
   );
 }
 

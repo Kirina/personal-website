@@ -12,7 +12,6 @@ export default function RPGPortfolio() {
   const [started, setStarted] = useState(false);
   const [spritesLoaded, setSpritesLoaded] = useState(false);
   const dialogRef = useRef(null);
-  const nightRef = useRef(false);
   const gs = useRef({
     px: 19 * TILE_SIZE,
     py: 11 * TILE_SIZE,
@@ -31,9 +30,6 @@ export default function RPGPortfolio() {
   useEffect(() => {
     dialogRef.current = dialog;
   }, [dialog]);
-  useEffect(() => {
-    nightRef.current = night;
-  }, [night]);
 
   // Touch controls
   const setKey = (key, val) => {
@@ -44,7 +40,6 @@ export default function RPGPortfolio() {
     canvasRef,
     started,
     dialogRef,
-    nightRef,
     gs,
     promptRef,
     setDialog,
@@ -205,21 +200,6 @@ export default function RPGPortfolio() {
         <div style={{ color: "#666", fontSize: 11 }}>
           WASD / Arrows to move &middot; SPACE to interact
         </div>
-        <button
-          onClick={() => setNight((n) => !n)}
-          style={{
-            background: "none",
-            border: "1px solid #555",
-            color: "#aaa",
-            borderRadius: 4,
-            padding: "2px 8px",
-            fontSize: 11,
-            cursor: "pointer",
-            fontFamily: "monospace",
-          }}
-        >
-          {night ? "\u2600\uFE0F Day" : "\u{1F319} Night"}
-        </button>
       </div>
       {/* Touch Controls */}
       <div

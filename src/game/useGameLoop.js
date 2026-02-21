@@ -5,19 +5,25 @@ import {
   PLAYER_SPEED,
   SCALE,
   SOLID,
+  TILE,
   TILE_SIZE,
   VIEW_HEIGHT,
   VIEW_WIDTH,
 } from "./constants";
 import { BUILDINGS, NPCS } from "./data";
-import { drawBuilding, drawChar, drawDialogBg, drawTile } from "./draw";
+import {
+  drawBuilding,
+  drawChar,
+  drawDialogBg,
+  drawTile,
+  drawTree,
+} from "./draw";
 import { MAP } from "./map";
 
 export function useGameLoop(
   canvasRef,
   started,
   dialogRef,
-  nightRef,
   gs,
   promptRef,
   setDialog,
@@ -168,6 +174,13 @@ export function useGameLoop(
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
           drawTile(ctx, MAP[y][x], x, y, s.tick);
 
+      // Collect visible tree tiles for depth-sorted rendering
+      const trees = [];
+      for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
+        for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
+          if (MAP[y][x] === TILE.TREE)
+            trees.push({ type: "t", y: y * TILE_SIZE, data: { x, y } });
+
       // Collect all entities and sort by Y for depth
       const entities = [
         ...BUILDINGS.map((b) => ({
@@ -175,6 +188,7 @@ export function useGameLoop(
           y: (b.y + b.h) * TILE_SIZE,
           data: b,
         })),
+        ...trees,
         { type: "f", y: 13 * TILE_SIZE, data: null },
         ...NPCS.map((n) => ({ type: "n", y: n.y + TILE_SIZE, data: n })),
         { type: "p", y: s.py + TILE_SIZE, data: null },
@@ -197,7 +211,8 @@ export function useGameLoop(
         k.D;
 
       entities.forEach((e) => {
-        if (e.type === "b") drawBuilding(ctx, e.data);
+        if (e.type === "t") drawTree(ctx, e.data.x, e.data.y);
+        else if (e.type === "b") drawBuilding(ctx, e.data);
         else if (e.type === "n") {
           const n = e.data,
             bob = Math.sin(s.tick * 0.04 + n.x) * 1;
@@ -228,24 +243,6 @@ export function useGameLoop(
           );
         }
       });
-
-      if (nightRef.current) {
-        ctx.fillStyle = "rgba(10,10,50,0.45)";
-        ctx.fillRect(camX, camY, cw, ch);
-        // Glow around player
-        const grd = ctx.createRadialGradient(
-          s.px + 8,
-          s.py + 8,
-          10,
-          s.px + 8,
-          s.py + 8,
-          70,
-        );
-        grd.addColorStop(0, "rgba(255,240,180,0.18)");
-        grd.addColorStop(1, "rgba(0,0,0,0)");
-        ctx.fillStyle = grd;
-        ctx.fillRect(s.px - 70, s.py - 70, 156, 156);
-      }
       // Draw dialog box on canvas using 9-slice sprite
       if (dialogRef.current) {
         const d = dialogRef.current;

@@ -2,14 +2,6 @@ import { CHAR_SIZE, MAP_HEIGHT, MAP_WIDTH, TILE, TILE_SIZE } from "./constants";
 import { MAP } from "./map";
 import { SPRITES } from "./sprites";
 
-// === DRAW HELPERS ===
-const shade = (hex, n) => {
-  const c = [1, 3, 5].map((i) =>
-    Math.max(0, Math.min(255, parseInt(hex.slice(i, i + 2), 16) + n)),
-  );
-  return `#${c.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-};
-
 // Tile source rects in tilesets — adjust these to match your tileset layout.
 // Format: [sourceX, sourceY] in pixels within the spritesheet.
 // The grass tileset uses autotile blocks (4 cols × 6 rows per terrain).
@@ -29,12 +21,23 @@ const PATH_TILE = [16, 16];
 // 3 animation frames in blocks at x = 0, 96, 192 (each block 96px wide)
 const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
-// Edge overlay positions [x, y] within each 96-wide block — adjust to match sheet
+// Edge & corner overlay positions [x, y] within each block — adjust to match sheet
 const WATER_EDGE = {
+  // Straight edges
   top: [16 * 10, 16 * 4],
   bottom: [16 * 9, 16 * 7],
   left: [16 * 8, 16 * 5],
   right: [16 * 11, 16 * 6],
+  // Convex corners (two cardinal sides are non-water)
+  cvxTL: [16 * 8, 16 * 4], // grass above + left
+  cvxTR: [16 * 11, 16 * 4], // grass above + right
+  cvxBL: [16 * 8, 16 * 7], // grass below + left
+  cvxBR: [16 * 11, 16 * 7], // grass below + right
+  // Concave corners (all cardinal sides are water, but diagonal is not)
+  ccvTL: [16 * 5, 16 * 5], // diagonal top-left is grass
+  ccvTR: [16 * 6, 16 * 5], // diagonal top-right is grass
+  ccvBL: [16 * 5, 16 * 6], // diagonal bottom-left is grass
+  ccvBR: [16 * 6, 16 * 6], // diagonal bottom-right is grass
 };
 const isWater = (x, y) =>
   x >= 0 &&
@@ -47,9 +50,9 @@ const FENCE_TILE = [16, 32];
 // Flower position in ALL props seasons sheet (small flower cluster)
 const FLOWER_SRC = [16 * 18, 16 * 3];
 // Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
-const TREE_SRC = [16 * 4, 0];
-const TREE_SRC_WIDTH = 32;
-const TREE_SRC_HEIGHT = 48;
+const TREE_SRC = [0, 16 * 3];
+const TREE_SRC_WIDTH = 16 * 2;
+const TREE_SRC_HEIGHT = 16 * 3;
 
 export function drawTile(ctx, type, x, y, tick) {
   const px = x * TILE_SIZE,
@@ -137,32 +140,32 @@ export function drawTile(ctx, type, x, y, tick) {
         );
       };
 
-      if (!isWater(x, y - 1)) draw(WATER_EDGE.top);
-      if (!isWater(x - 1, y)) draw(WATER_EDGE.left);
-      if (!isWater(x + 1, y)) draw(WATER_EDGE.right);
-      if (!isWater(x, y + 1)) draw(WATER_EDGE.bottom);
+      const t = !isWater(x, y - 1); // non-water above
+      const b = !isWater(x, y + 1); // non-water below
+      const l = !isWater(x - 1, y); // non-water left
+      const r = !isWater(x + 1, y); // non-water right
+
+      // Convex corners (two adjacent cardinal sides are non-water)
+      if (t && l) draw(WATER_EDGE.cvxTL);
+      if (t && r) draw(WATER_EDGE.cvxTR);
+      if (b && l) draw(WATER_EDGE.cvxBL);
+      if (b && r) draw(WATER_EDGE.cvxBR);
+
+      // Straight edges (only one cardinal side is non-water)
+      if (t && !l && !r) draw(WATER_EDGE.top);
+      if (b && !l && !r) draw(WATER_EDGE.bottom);
+      if (l && !t && !b) draw(WATER_EDGE.left);
+      if (r && !t && !b) draw(WATER_EDGE.right);
+
+      // Concave corners (all cardinal neighbors are water, diagonal is not)
+      if (!t && !l && !isWater(x - 1, y - 1)) draw(WATER_EDGE.ccvTL);
+      if (!t && !r && !isWater(x + 1, y - 1)) draw(WATER_EDGE.ccvTR);
+      if (!b && !l && !isWater(x - 1, y + 1)) draw(WATER_EDGE.ccvBL);
+      if (!b && !r && !isWater(x + 1, y + 1)) draw(WATER_EDGE.ccvBR);
     }
   } else if (type === TILE.TREE) {
-    // Overlay mahogany tree sprite
-    const mt = SPRITES.mahoganyTreeTiles;
-    if (mt?.complete) {
-      const [tx, ty] = TREE_SRC;
-      // Draw at full size (2×3 tiles), anchored so the bottom-center
-      // aligns with this tile — tree extends 2 tiles up and 1 tile right
-      const destW = TREE_SRC_WIDTH;
-      const destH = TREE_SRC_HEIGHT;
-      ctx.drawImage(
-        mt,
-        tx,
-        ty,
-        TREE_SRC_WIDTH,
-        TREE_SRC_HEIGHT,
-        px - TILE_SIZE / 2,
-        py - destH + TILE_SIZE,
-        destW,
-        destH,
-      );
-    }
+    // Tree sprite is drawn in a separate pass (drawTree) after all tiles,
+    // so neighbouring tiles don't paint over it. Nothing to do here.
   } else if (type === TILE.FENCE) {
     const ft = SPRITES.fenceTiles;
     if (ft?.complete) {
@@ -180,6 +183,26 @@ export function drawTile(ctx, type, x, y, tick) {
       );
     }
   }
+}
+
+// Draw a tree sprite at tile (x, y). Called in a post-tile pass so neighbouring
+// tiles cannot paint over the sprite.
+export function drawTree(ctx, x, y) {
+  const mt = SPRITES.mahoganyTreeTiles;
+  if (!mt?.complete) return;
+  const px = x * TILE_SIZE;
+  const py = y * TILE_SIZE;
+  ctx.drawImage(
+    mt,
+    TREE_SRC[0],
+    TREE_SRC[1],
+    TREE_SRC_WIDTH,
+    TREE_SRC_HEIGHT,
+    px - TILE_SIZE / 2,
+    py - TREE_SRC_HEIGHT + TILE_SIZE,
+    TREE_SRC_WIDTH,
+    TREE_SRC_HEIGHT,
+  );
 }
 
 export function drawBuilding(ctx, b) {

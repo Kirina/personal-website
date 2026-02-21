@@ -44,12 +44,12 @@ export const MAP = (() => {
   fill([17, 18], [30, 31, 32], TILE.PATH);
 
   // ── POND ─────────────────────────────────────────────────────────────────────
-  // Large scenic pond: cols 12-17, rows 4-11
-  fill(range(4, 12), range(12, 18), TILE.WATER);
-  // Pond fences — west edge, south edge, and connecting corner
-  fill(range(4, 12), [11], TILE.FENCE);
-  fill([12], range(12, 18), TILE.FENCE);
-  m[12][11] = TILE.FENCE; // bottom-left corner joining west + south fence
+  // Large scenic pond: rows, cols
+  fill(range(3, 5), range(6, 18), TILE.WATER);
+  fill(range(5, 6), range(9, 18), TILE.WATER);
+  fill(range(6, 7), range(9, 16), TILE.WATER);
+  fill(range(7, 11), range(10, 13), TILE.WATER);
+  fill(range(11, 14), range(0, 13), TILE.WATER);
 
   // ── FARM FIELD ───────────────────────────────────────────────────────────────
   // Tilled soil east of Library: cols 9-14, rows 20-24
@@ -61,15 +61,26 @@ export const MAP = (() => {
   // ── CHERRY BLOSSOM GROVE ─────────────────────────────────────────────────────
   // Primary grove: top-right quadrant, avoiding Workshop cols 27-34 rows 3-8
   [
-    [3, 21], [3, 24], [3, 36],
-    [4, 21], [4, 35],
-    [5, 21], [5, 36],
-    [6, 22], [6, 35],
-    [7, 24], [7, 36],
-    [8, 21], [8, 35],
-    [9, 22], [10, 36],
+    [3, 21],
+    [3, 24],
+    [3, 36],
+    [4, 21],
+    [4, 35],
+    [5, 21],
+    [5, 36],
+    [6, 22],
+    [6, 35],
+    [7, 24],
+    [7, 36],
+    [8, 21],
+    [8, 35],
+    [9, 22],
+    [10, 36],
     // Scattered cherry trees elsewhere
-    [11, 37], [17, 3], [25, 20], [24, 37],
+    [11, 37],
+    [17, 3],
+    [25, 20],
+    [24, 37],
   ].forEach(([y, x]) => {
     if (m[y][x] === TILE.GRASS) m[y][x] = TILE.CHERRY_TREE;
   });
@@ -79,15 +90,35 @@ export const MAP = (() => {
     // Between Home and pond (col 11, row 3 — above pond fence which starts row 4)
     [3, 11],
     // Right of pond area, left of Workshop
-    [3, 20], [4, 20], [5, 20], [9, 20], [11, 20],
+    [3, 20],
+    [4, 20],
+    [5, 20],
+    [9, 20],
+    [11, 20],
     // Between Workshop and border (right side, rows 3-12)
-    [3, 26], [4, 26], [9, 26], [11, 26],
+    [3, 26],
+    [4, 26],
+    [9, 26],
+    [11, 26],
     // Lower-left (below main path, outside Library footprint, outside branch path)
-    [15, 3], [16, 3], [22, 3], [25, 3], [26, 3],
+    [15, 3],
+    [16, 3],
+    [22, 3],
+    [25, 3],
+    [26, 3],
     // Lower-right (below main path, outside Garden, outside branch path)
-    [15, 37], [16, 37], [22, 37], [25, 37], [26, 37],
+    [15, 37],
+    [16, 37],
+    [22, 37],
+    [25, 37],
+    [26, 37],
     // South-center open areas
-    [16, 22], [16, 26], [22, 22], [22, 26], [25, 24], [26, 22],
+    [16, 22],
+    [16, 26],
+    [22, 22],
+    [22, 26],
+    [25, 24],
+    [26, 22],
   ].forEach(([y, x]) => {
     if (m[y][x] === TILE.GRASS) m[y][x] = TILE.TREE;
   });
@@ -95,25 +126,49 @@ export const MAP = (() => {
   // ── FLOWERS ──────────────────────────────────────────────────────────────────
   [
     // North of pond (row 3)
-    [3, 13], [3, 14], [3, 16],
+    [3, 13],
+    [3, 14],
+    [3, 16],
     // Below Home (rows 9-10, outside footprint cols 3-10)
-    [9, 11], [10, 10],
+    [9, 11],
+    [10, 10],
     // Below Workshop (rows 9-10, outside footprint cols 27-34)
-    [9, 25], [10, 25],
+    [9, 25],
+    [10, 25],
     // South/west of pond-fence area
-    [12, 9], [12, 10],
+    [12, 9],
+    [12, 10],
     // Path edges (rows 12 and 15)
-    [12, 4],  [12, 8],  [12, 20], [12, 25],
-    [15, 4],  [15, 8],  [15, 20], [15, 25],
+    [12, 4],
+    [12, 8],
+    [12, 20],
+    [12, 25],
+    [15, 4],
+    [15, 8],
+    [15, 20],
+    [15, 25],
     // Near Library and Garden (outside footprints)
-    [17, 8],  [17, 9],  [17, 26], [17, 27],
-    [22, 8],  [23, 8],  [22, 26], [23, 26],
+    [17, 8],
+    [17, 9],
+    [17, 26],
+    [17, 27],
+    [22, 8],
+    [23, 8],
+    [22, 26],
+    [23, 26],
     // Center open areas
-    [16, 15], [16, 17], [16, 23], [16, 27],
+    [16, 15],
+    [16, 17],
+    [16, 23],
+    [16, 27],
     // South open areas
-    [24, 17], [24, 25], [26, 17], [26, 25],
+    [24, 17],
+    [24, 25],
+    [26, 17],
+    [26, 25],
     // Cherry grove adjacent
-    [11, 23], [11, 25],
+    [11, 23],
+    [11, 25],
   ].forEach(([y, x]) => {
     if (m[y][x] === TILE.GRASS) m[y][x] = TILE.FLOWER;
   });

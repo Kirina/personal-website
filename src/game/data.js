@@ -4,7 +4,7 @@ import { TILE_SIZE } from "./constants";
 export const BUILDINGS = [
   {
     x: 3,
-    y: 3,
+    y: 1,
     spriteWidth: 5,
     spriteHeight: 7,
     spriteX: 16 * 5,

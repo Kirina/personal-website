@@ -16,5 +16,6 @@ export const TILE = {
   FLOWER: 3,
   TREE: 4,
   FENCE: 5,
+  CHERRY_TREE: 6,
 };
-export const SOLID = new Set([TILE.WATER, TILE.TREE, TILE.FENCE]);
+export const SOLID = new Set([TILE.WATER, TILE.TREE, TILE.FENCE, TILE.CHERRY_TREE]);

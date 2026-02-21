@@ -40,14 +40,27 @@ const EDGE_NO_BACKGROUND = {
 };
 const isCurrent = (x, y, Current) =>
   x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT && MAP[y][x] === Current;
-// Fence tile from fence-wood sheet (horizontal rail segment)
-const FENCE_TILE = [16, 32];
+// Fence tiles from fence-wood sheet (6 cols × 10 rows at 16×16)
+const FENCE = {
+  horizontal: [16, 16 * 2],
+  vertical: [0, 16],
+  left_end: [16 * 2, 16],
+  right_end: [16 * 2, 16],
+  left_top_corner: [0, 0],
+  right_top_corner: [16 * 2, 0],
+  left_bottom_corner: [0, 16 * 2],
+  right_bottom_corner: [16 * 2, 16 * 2],
+};
 // Flower position in ALL props seasons sheet (small flower cluster)
 const FLOWER_SRC = [16 * 18, 16 * 3];
 // Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
 const TREE_SRC = [0, 16 * 3];
 const TREE_SRC_WIDTH = 16 * 2;
 const TREE_SRC_HEIGHT = 16 * 3;
+// Cherry tree: full-grown spring bloom, frame 4 (x=128) in the 14-frame growth sheet
+const CHERRY_TREE_SRC = [16 * 8, 0];
+const CHERRY_TREE_SRC_WIDTH = 16 * 2;
+const CHERRY_TREE_SRC_HEIGHT = 16 * 3;
 
 function drawEdges(ctx, wt, px, py, x, y, tile, edge, spriteBlockX) {
   const draw = (edge) => {
@@ -173,13 +186,29 @@ export function drawTile(ctx, type, x, y, tick) {
         spriteBlockX,
       );
     }
-  } else if (type === TILE.TREE) {
-    // Tree sprite is drawn in a separate pass (drawTree) after all tiles,
-    // so neighbouring tiles don't paint over it. Nothing to do here.
+  } else if (type === TILE.TREE || type === TILE.CHERRY_TREE) {
+    // Drawn in a separate depth-sorted pass; nothing to do here.
   } else if (type === TILE.FENCE) {
     const ft = SPRITES.fenceTiles;
     if (ft?.complete) {
-      const [sx, sy] = FENCE_TILE;
+      const isF = (nx, ny) =>
+        nx >= 0 &&
+        nx < MAP_WIDTH &&
+        ny >= 0 &&
+        ny < MAP_HEIGHT &&
+        MAP[ny][nx] === TILE.FENCE;
+      const L = isF(x - 1, y), R = isF(x + 1, y);
+      const U = isF(x, y - 1), D = isF(x, y + 1);
+      let src;
+      if      (!L && R && !U && D) src = FENCE.left_top_corner;
+      else if (L && !R && !U && D) src = FENCE.right_top_corner;
+      else if (!L && R && U && !D) src = FENCE.left_bottom_corner;
+      else if (L && !R && U && !D) src = FENCE.right_bottom_corner;
+      else if (!L && R && !U && !D) src = FENCE.left_end;
+      else if (L && !R && !U && !D) src = FENCE.right_end;
+      else if (L || R)              src = FENCE.horizontal;
+      else                          src = FENCE.vertical;
+      const [sx, sy] = src;
       ctx.drawImage(
         ft,
         sx,
@@ -212,6 +241,24 @@ export function drawTree(ctx, x, y) {
     py - TREE_SRC_HEIGHT + TILE_SIZE,
     TREE_SRC_WIDTH,
     TREE_SRC_HEIGHT,
+  );
+}
+
+export function drawCherryTree(ctx, x, y) {
+  const ct = SPRITES.cherryTreeTiles;
+  if (!ct?.complete) return;
+  const px = x * TILE_SIZE;
+  const py = y * TILE_SIZE;
+  ctx.drawImage(
+    ct,
+    CHERRY_TREE_SRC[0],
+    CHERRY_TREE_SRC[1],
+    CHERRY_TREE_SRC_WIDTH,
+    CHERRY_TREE_SRC_HEIGHT,
+    px - TILE_SIZE / 2,
+    py - CHERRY_TREE_SRC_HEIGHT + TILE_SIZE,
+    CHERRY_TREE_SRC_WIDTH,
+    CHERRY_TREE_SRC_HEIGHT,
   );
 }
 

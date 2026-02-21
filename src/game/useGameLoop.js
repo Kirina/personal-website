@@ -14,6 +14,7 @@ import { BUILDINGS, NPCS } from "./data";
 import {
   drawBuilding,
   drawChar,
+  drawCherryTree,
   drawDialogBg,
   drawTile,
   drawTree,
@@ -180,6 +181,8 @@ export function useGameLoop(
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
           if (MAP[y][x] === TILE.TREE)
             trees.push({ type: "t", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (MAP[y][x] === TILE.CHERRY_TREE)
+            trees.push({ type: "ct", y: (y + 1) * TILE_SIZE, data: { x, y } });
 
       // Collect all entities and sort by Y for depth
       const entities = [
@@ -211,6 +214,7 @@ export function useGameLoop(
 
       entities.forEach((e) => {
         if (e.type === "t") drawTree(ctx, e.data.x, e.data.y);
+        else if (e.type === "ct") drawCherryTree(ctx, e.data.x, e.data.y);
         else if (e.type === "b") drawBuilding(ctx, e.data);
         else if (e.type === "n") {
           const n = e.data,

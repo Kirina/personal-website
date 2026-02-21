@@ -3,14 +3,12 @@ import { TILE_SIZE } from "./constants";
 // === BUILDINGS ===
 export const BUILDINGS = [
   {
-    x: 5,
-    y: 4,
-    w: 6,
-    h: 5,
+    x: 3,
+    y: 3,
+    w: 8,
+    h: 6,
     name: "Home",
     spriteKey: "home",
-    roof: "#c44",
-    wall: "#e8b87a",
     content: {
       title: "\u{1F3E0} About Me",
       pages: [
@@ -21,14 +19,12 @@ export const BUILDINGS = [
     },
   },
   {
-    x: 28,
-    y: 4,
-    w: 6,
-    h: 5,
+    x: 27,
+    y: 3,
+    w: 8,
+    h: 6,
     name: "Workshop",
     spriteKey: "workshop",
-    roof: "#4a8",
-    wall: "#8cb4d4",
     content: {
       title: "\u{1F527} Skills & Projects",
       pages: [
@@ -40,14 +36,12 @@ export const BUILDINGS = [
     },
   },
   {
-    x: 5,
+    x: 3,
     y: 18,
-    w: 4,
-    h: 4,
+    w: 5,
+    h: 6,
     name: "Library",
     spriteKey: "library",
-    roof: "#84c",
-    wall: "#c4a8d8",
     content: {
       title: "\u{1F4DA} Education & Experience",
       pages: [
@@ -60,12 +54,10 @@ export const BUILDINGS = [
   {
     x: 28,
     y: 18,
-    w: 4,
-    h: 4,
+    w: 5,
+    h: 5,
     name: "Garden",
     spriteKey: "garden",
-    roof: "#4c4",
-    wall: "#a8d8a4",
     content: {
       title: "\u{1F33F} Hobbies & Contact",
       pages: [
@@ -84,8 +76,6 @@ export const NPCS = [
     y: 13 * TILE_SIZE,
     name: "Guide",
     spriteKey: "npcGuide",
-    hair: "#e44",
-    shirt: "#44e",
     dialog: [
       "Welcome to Portfolio Town! \u{1F3AE}",
       "Explore the buildings to learn about me \u2014 just walk up to a door and press SPACE!",
@@ -93,12 +83,10 @@ export const NPCS = [
     ],
   },
   {
-    x: 33 * TILE_SIZE,
+    x: 34 * TILE_SIZE,
     y: 21 * TILE_SIZE,
     name: "Whiskers",
     spriteKey: "cat",
-    hair: "#f90",
-    shirt: "#f90",
     isCat: true,
     dialog: [
       "Meow! \u{1F431}",
@@ -111,8 +99,6 @@ export const NPCS = [
     y: 15 * TILE_SIZE,
     name: "Sage",
     spriteKey: "npcSage",
-    hair: "#ccc",
-    shirt: "#864",
     dialog: [
       "Ah, a visitor! Welcome, welcome.",
       "Each building holds part of the story. The Workshop has some great projects!",

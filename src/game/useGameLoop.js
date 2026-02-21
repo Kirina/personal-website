@@ -179,7 +179,7 @@ export function useGameLoop(
       for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
           if (MAP[y][x] === TILE.TREE)
-            trees.push({ type: "t", y: y * TILE_SIZE, data: { x, y } });
+            trees.push({ type: "t", y: (y + 1) * TILE_SIZE, data: { x, y } });
 
       // Collect all entities and sort by Y for depth
       const entities = [
@@ -189,7 +189,6 @@ export function useGameLoop(
           data: b,
         })),
         ...trees,
-        { type: "f", y: 13 * TILE_SIZE, data: null },
         ...NPCS.map((n) => ({ type: "n", y: n.y + TILE_SIZE, data: n })),
         { type: "p", y: s.py + TILE_SIZE, data: null },
       ].sort((a, b) => a.y - b.y);

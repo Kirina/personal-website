@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { SCALE, TILE_SIZE, VIEW_HEIGHT, VIEW_WIDTH } from "./game/constants";
-import { SPRITE_PROMISES } from "./game/sprites";
 import { useGameLoop } from "./game/useGameLoop";
 
 // === MAIN COMPONENT ===
@@ -8,9 +7,6 @@ export default function RPGPortfolio() {
   const canvasRef = useRef(null);
   const [dialog, setDialog] = useState(null);
   const [prompt, setPrompt] = useState(null);
-  const [night, setNight] = useState(false);
-  const [started, setStarted] = useState(false);
-  const [spritesLoaded, setSpritesLoaded] = useState(false);
   const dialogRef = useRef(null);
   const gs = useRef({
     px: 19 * TILE_SIZE,
@@ -24,10 +20,6 @@ export default function RPGPortfolio() {
   const promptRef = useRef(null);
 
   useEffect(() => {
-    Promise.all(SPRITE_PROMISES).then(() => setSpritesLoaded(true));
-  }, []);
-
-  useEffect(() => {
     dialogRef.current = dialog;
   }, [dialog]);
 
@@ -36,15 +28,7 @@ export default function RPGPortfolio() {
     gs.current.keys[key] = val;
   };
 
-  useGameLoop(
-    canvasRef,
-    started,
-    dialogRef,
-    gs,
-    promptRef,
-    setDialog,
-    setPrompt,
-  );
+  useGameLoop(canvasRef, true, dialogRef, gs, promptRef, setDialog, setPrompt);
 
   const advanceDialog = () => {
     if (!dialogRef.current) {
@@ -62,49 +46,6 @@ export default function RPGPortfolio() {
     if (d.page < d.pages.length - 1) setDialog({ ...d, page: d.page + 1 });
     else setDialog(null);
   };
-
-  if (!started)
-    return (
-      <div
-        style={{
-          width: "100%",
-          height: "100vh",
-          background: "#1a1a2e",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: "monospace",
-          color: "#fff",
-        }}
-      >
-        <div style={{ fontSize: 32, letterSpacing: 4, marginBottom: 8 }}>
-          {"\u2728"} PORTFOLIO TOWN {"\u2728"}
-        </div>
-        <div style={{ color: "#8af", fontSize: 14, marginBottom: 32 }}>
-          A pixel-art RPG portfolio experience
-        </div>
-        <button
-          onClick={() => spritesLoaded && setStarted(true)}
-          style={{
-            padding: "12px 40px",
-            fontSize: 18,
-            fontFamily: "monospace",
-            background: spritesLoaded ? "#4a7" : "#555",
-            color: "#fff",
-            border: `3px solid ${spritesLoaded ? "#5b8" : "#666"}`,
-            borderRadius: 8,
-            cursor: spritesLoaded ? "pointer" : "wait",
-            letterSpacing: 2,
-          }}
-        >
-          {spritesLoaded ? "START GAME" : "LOADING..."}
-        </button>
-        <div style={{ color: "#666", fontSize: 12, marginTop: 24 }}>
-          WASD / Arrows to move &middot; SPACE to interact
-        </div>
-      </div>
-    );
 
   const TB = {
     background: "rgba(40,40,60,0.85)",

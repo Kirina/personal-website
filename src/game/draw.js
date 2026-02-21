@@ -21,7 +21,7 @@ const PATH_TILE = [16 * 9, 16 * 10];
 const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
 // Edge & corner overlay positions [x, y] within each block — adjust to match sheet
-const GRASS_EDGE_NO_BACKGROUND = {
+const EDGE_NO_BACKGROUND = {
   // Straight edges
   top: [16 * 10, 16 * 4],
   bottom: [16 * 9, 16 * 7],
@@ -148,7 +148,7 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-      drawEdges(ctx, pt, px, py, x, y, TILE.PATH, GRASS_EDGE_NO_BACKGROUND, 0);
+      drawEdges(ctx, pt, px, py, x, y, TILE.PATH, EDGE_NO_BACKGROUND, 0);
     }
   } else if (type === TILE.WATER) {
     // Solid blue base for all water
@@ -169,7 +169,7 @@ export function drawTile(ctx, type, x, y, tick) {
         x,
         y,
         TILE.WATER,
-        GRASS_EDGE_NO_BACKGROUND,
+        EDGE_NO_BACKGROUND,
         spriteBlockX,
       );
     }

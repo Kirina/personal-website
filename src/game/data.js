@@ -5,8 +5,8 @@ export const BUILDINGS = [
   {
     x: 5,
     y: 4,
-    w: 5,
-    h: 4,
+    w: 6,
+    h: 5,
     name: "Home",
     spriteKey: "home",
     roof: "#c44",
@@ -23,8 +23,8 @@ export const BUILDINGS = [
   {
     x: 28,
     y: 4,
-    w: 5,
-    h: 4,
+    w: 6,
+    h: 5,
     name: "Workshop",
     spriteKey: "workshop",
     roof: "#4a8",
@@ -42,7 +42,7 @@ export const BUILDINGS = [
   {
     x: 5,
     y: 18,
-    w: 5,
+    w: 4,
     h: 4,
     name: "Library",
     spriteKey: "library",
@@ -60,7 +60,7 @@ export const BUILDINGS = [
   {
     x: 28,
     y: 18,
-    w: 5,
+    w: 4,
     h: 4,
     name: "Garden",
     spriteKey: "garden",

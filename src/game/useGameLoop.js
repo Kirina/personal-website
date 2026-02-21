@@ -79,7 +79,7 @@ export function useGameLoop(
         if (
           px >= b.x * TILE_SIZE &&
           px < (b.x + b.w) * TILE_SIZE &&
-          py >= b.y * TILE_SIZE &&
+          py >= (b.y + 2) * TILE_SIZE &&
           py < (b.y + b.h) * TILE_SIZE
         )
           return true;

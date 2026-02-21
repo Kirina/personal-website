@@ -217,12 +217,6 @@ export function drawBuilding(ctx, b) {
     // Offset upward by T to allow roof overhang above the collision zone.
     ctx.drawImage(img, px, py - TILE_SIZE, pw, ph + TILE_SIZE);
   }
-
-  // Name label
-  ctx.fillStyle = "#fff";
-  ctx.font = "7px monospace";
-  ctx.textAlign = "center";
-  ctx.fillText(b.name, px + pw / 2, py - TILE_SIZE - 4);
 }
 
 // Draw a character or cat using spritesheet.

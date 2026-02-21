@@ -1,4 +1,5 @@
-import { CHAR_SIZE, TILE, TILE_SIZE } from "./constants";
+import { CHAR_SIZE, MAP_HEIGHT, MAP_WIDTH, TILE, TILE_SIZE } from "./constants";
+import { MAP } from "./map";
 import { SPRITES } from "./sprites";
 
 // === DRAW HELPERS ===
@@ -24,14 +25,23 @@ const GRASS_DECOR = [
 const tileHash = (x, y) => ((x * 2654435761) ^ (y * 2246822519)) >>> 0;
 // Tilled soil inner fill tile
 const PATH_TILE = [16, 16];
-// Water animation: 4 frames from the water tileset.
-// Each autotile block is 6 tiles (96px) wide; inner fill at col offset +1.
-const WATER_FRAMES = [
-  [16, 16],
-  [112, 16],
-  [208, 16],
-  [304, 16],
-];
+// Water edges from grass-water-spring.png (autotile A1 format)
+// 3 animation frames in blocks at x = 0, 96, 192 (each block 96px wide)
+const WATER_BLOCK_W = 192;
+const WATER_ANIM_FRAMES = 3;
+// Edge overlay positions [x, y] within each 96-wide block — adjust to match sheet
+const WATER_EDGE = {
+  top: [16 * 10, 16 * 4],
+  bottom: [16 * 9, 16 * 7],
+  left: [16 * 8, 16 * 5],
+  right: [16 * 11, 16 * 6],
+};
+const isWater = (x, y) =>
+  x >= 0 &&
+  x < MAP_WIDTH &&
+  y >= 0 &&
+  y < MAP_HEIGHT &&
+  MAP[y][x] === TILE.WATER;
 // Fence tile from fence-wood sheet (horizontal rail segment)
 const FENCE_TILE = [16, 32];
 // Flower position in ALL props seasons sheet (small flower cluster)
@@ -101,26 +111,36 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-    } else {
-      ctx.fillStyle = "#c9a96e";
-      ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
     }
   } else if (type === TILE.WATER) {
+    // Solid blue base for all water
+    ctx.fillStyle = "#0092DD";
+    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+
+    // Overlay animated edge tiles where water meets non-water
     const wt = SPRITES.waterTiles;
     if (wt?.complete) {
-      const frame = Math.floor(tick / 15) % WATER_FRAMES.length;
-      const [sx, sy] = WATER_FRAMES[frame];
-      ctx.drawImage(
-        wt,
-        sx,
-        sy,
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
+      const blockX =
+        (Math.floor(tick / 20) % WATER_ANIM_FRAMES) * WATER_BLOCK_W;
+      const draw = (edge) => {
+        const [ex, ey] = edge;
+        ctx.drawImage(
+          wt,
+          blockX + ex,
+          ey,
+          TILE_SIZE,
+          TILE_SIZE,
+          px,
+          py,
+          TILE_SIZE,
+          TILE_SIZE,
+        );
+      };
+
+      if (!isWater(x, y - 1)) draw(WATER_EDGE.top);
+      if (!isWater(x - 1, y)) draw(WATER_EDGE.left);
+      if (!isWater(x + 1, y)) draw(WATER_EDGE.right);
+      if (!isWater(x, y + 1)) draw(WATER_EDGE.bottom);
     }
   } else if (type === TILE.TREE) {
     // Overlay mahogany tree sprite
@@ -170,9 +190,6 @@ export function drawBuilding(ctx, b) {
   const img = SPRITES[b.spriteKey];
 
   if (img?.complete) {
-    // Draw shadow
-    ctx.fillStyle = "rgba(0,0,0,0.10)";
-    ctx.fillRect(px + 4, py + 4, pw, ph);
     // Draw the pre-composed building image, scaled to fit the building area.
     // Offset upward by T to allow roof overhang above the collision zone.
     ctx.drawImage(img, px, py - TILE_SIZE, pw, ph + TILE_SIZE);

@@ -16,7 +16,7 @@ const loadImg = (key, src) => {
 
 // Tiles
 loadImg("grassTiles", "/assets/tiles/grass-spring.png");
-loadImg("waterTiles", "/assets/tiles/water-anim.png");
+loadImg("waterTiles", "/assets/tiles/grass-water-spring.png");
 loadImg("pathTiles", "/assets/tiles/tilled-soil.png");
 loadImg("propsTiles", "/assets/tiles/props.png");
 loadImg("mahoganyTreeTiles", "/assets/tiles/mahogany-tree.png");

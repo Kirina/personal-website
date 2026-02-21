@@ -20,6 +20,29 @@ const PATH_TILE = [16 * 9, 16 * 10];
 
 const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
+
+const WATERFALL = {
+  numFrames: 8,
+  offsetFrames: 16 * 3,
+  height: 16 * 4,
+  left: [0, 16 * 6],
+  middle: [16, 16 * 6],
+  right: [16 * 2, 16 * 6],
+};
+
+const CLIFF_TOP = {
+  left: [16 * 8, 16 * 3],
+  middle: [16 * 9, 16 * 3],
+  right: [16 * 11, 16 * 3],
+};
+
+const CLIFF_WATER_BOTTOM = {
+  numFrames: 4,
+  offsetFrames: 16 * 3,
+  left: [0, 16 * 5],
+  middle: [16, 16 * 5],
+  right: [16 * 2, 16 * 5],
+};
 // Edge & corner overlay positions [x, y] within each block — adjust to match sheet
 const EDGE_NO_BACKGROUND = {
   // Straight edges

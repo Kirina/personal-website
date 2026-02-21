@@ -22,6 +22,7 @@ loadImg("propsTiles", "/assets/tiles/props.png");
 loadImg("mahoganyTreeTiles", "/assets/tiles/mahogany-tree.png");
 loadImg("fenceTiles", "/assets/tiles/fence-wood.png");
 loadImg("cherryTreeTiles", "/assets/tiles/cherry-tree.png");
+loadImg("waterfallCliff", "/assets/tiles/waterfall-cliff.png");
 
 // Buildings (pre-composed)
 loadImg("home", "/assets/buildings/home.png");

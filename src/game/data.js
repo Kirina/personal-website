@@ -5,8 +5,10 @@ export const BUILDINGS = [
   {
     x: 3,
     y: 3,
-    spriteWidth: 8,
-    spriteHeight: 6,
+    spriteWidth: 5,
+    spriteHeight: 7,
+    spriteX: 16 * 5,
+    spriteY: 16 * 0,
     name: "Workshop",
     spriteKey: "workshop",
     content: {

@@ -31,9 +31,13 @@ const WATERFALL = {
 };
 
 const CLIFF_TOP = {
-  left: [16 * 8, 16 * 3],
   middle: [16 * 9, 16 * 3],
+  left: [16 * 8, 16 * 2],
   right: [16 * 11, 16 * 3],
+  concave_left_corner: [16 * 8, 16 * 3],
+  concave_right_corner: [16 * 11, 16 * 3],
+  convex_left_corner: [16 * 5, 16 * 2],
+  convex_right_corner: [16 * 6, 16 * 2],
 };
 
 const CLIFF_WATER_BOTTOM = {
@@ -107,9 +111,9 @@ function drawEdges(
   tile,
   edge,
   spriteBlockX,
-  adjacentIsCliff = false,
-  adjacentIsGrass = true,
-  adjacentIsPath = true,
+  adjacentIsCliff = false, // for water borders
+  adjacentIsGrass = true, // for water borders
+  adjacentIsPath = true, // for water borders
 ) {
   const draw = (edge) => {
     const [ex, ey] = edge;
@@ -310,11 +314,10 @@ export function drawTile(ctx, type, x, y, tick) {
       else if (L && !R && !U && !D) src = FENCE.right_end;
       else if (L || R) src = FENCE.horizontal;
       else src = FENCE.vertical;
-      const [sx, sy] = src;
       ctx.drawImage(
         ft,
-        sx,
-        sy,
+        src[0],
+        src[1],
         TILE_SIZE,
         TILE_SIZE,
         px,
@@ -326,7 +329,7 @@ export function drawTile(ctx, type, x, y, tick) {
   } else if (type === TILE.CLIFF) {
     const wc = SPRITES.waterfallCliff;
     if (wc?.complete) {
-      const isC = (nx, ny) =>
+      const isCliff = (nx, ny) =>
         nx >= 0 &&
         nx < MAP_WIDTH &&
         ny >= 0 &&
@@ -338,19 +341,60 @@ export function drawTile(ctx, type, x, y, tick) {
         ny >= 0 &&
         ny < MAP_HEIGHT &&
         MAP[ny][nx] === TILE.WATER;
-      const isBottom = !isC(x, y + 1); // face: no cliff below
-      const isJustAboveFace = isC(x, y + 1) && !isC(x, y + 2); // one row above face
+      const isBottom = !isCliff(x, y + 1); // face: no cliff below
+      const isJustAboveFace = isCliff(x, y + 1) && !isCliff(x, y + 2); // one row above face
 
       // Rows further above the face are on top of the cliff — just grass.
-      if (!isBottom && !isJustAboveFace) return;
-
+      if (!isBottom && !isJustAboveFace) {
+        if (isCliff(x, y + 1) && isCliff(x, y + 2) && !isCliff(x + 1, y + 2)) {
+          // if tile at bottom is top and right is top -> right convex
+          if (
+            isCliff(x + 1, y) &&
+            isCliff(x + 1, y + 1) &&
+            !isCliff(x + 1, y + 2)
+          ) {
+            ctx.drawImage(
+              wc,
+              CLIFF_TOP.convex_right_corner[0],
+              CLIFF_TOP.convex_right_corner[1],
+              TILE_SIZE,
+              TILE_SIZE,
+              px,
+              py,
+              TILE_SIZE,
+              TILE_SIZE,
+            );
+          }
+          return;
+        }
+        if (isCliff(x, y + 1) && isCliff(x, y + 2) && !isCliff(x - 1, y + 2)) {
+          // if tile at bottom is top and left is top -> left convex
+          if (
+            isCliff(x - 1, y) &&
+            isCliff(x - 1, y + 1) &&
+            !isCliff(x - 1, y + 2)
+          ) {
+            ctx.drawImage(
+              wc,
+              CLIFF_TOP.convex_left_corner[0],
+              CLIFF_TOP.convex_left_corner[1],
+              TILE_SIZE,
+              TILE_SIZE,
+              px,
+              py,
+              TILE_SIZE,
+              TILE_SIZE,
+            );
+          }
+        }
+        return;
+      }
       if (isJustAboveFace) {
         // Base middle edge drawn on every cliff-top tile.
-        const [mx, my] = CLIFF_TOP.middle;
         ctx.drawImage(
           wc,
-          mx,
-          my,
+          CLIFF_TOP.middle[0],
+          CLIFF_TOP.middle[1],
           TILE_SIZE,
           TILE_SIZE,
           px,
@@ -360,12 +404,11 @@ export function drawTile(ctx, type, x, y, tick) {
         );
         // Corner overlays — drawn on top, like water's cvxTL/cvxTR.
         // Left: no cliff-top to the left, OR face row has cliff diagonally left.
-        if (!isC(x - 1, y) || isC(x - 1, y + 1)) {
-          const [lx, ly] = CLIFF_TOP.left;
+        if (!isCliff(x - 1, y) || !isCliff(x - 1, y + 1)) {
           ctx.drawImage(
             wc,
-            lx,
-            ly,
+            CLIFF_TOP.concave_left_corner[0],
+            CLIFF_TOP.concave_left_corner[1],
             TILE_SIZE,
             TILE_SIZE,
             px,
@@ -375,12 +418,11 @@ export function drawTile(ctx, type, x, y, tick) {
           );
         }
         // Right: no cliff-top to the right, OR face row has cliff diagonally right.
-        if (!isC(x + 1, y) || isC(x + 1, y + 1)) {
-          const [rx, ry] = CLIFF_TOP.right;
+        if (!isCliff(x + 1, y) || !isCliff(x + 1, y + 1)) {
           ctx.drawImage(
             wc,
-            rx,
-            ry,
+            CLIFF_TOP.concave_right_corner[0],
+            CLIFF_TOP.concave_right_corner[1],
             TILE_SIZE,
             TILE_SIZE,
             px,
@@ -390,8 +432,8 @@ export function drawTile(ctx, type, x, y, tick) {
           );
         }
       } else {
-        const L = isC(x - 1, y),
-          R = isC(x + 1, y);
+        const L = isCliff(x - 1, y),
+          R = isCliff(x + 1, y);
         let set, frameX;
         if (isWater(x, y + 1)) {
           ctx.fillStyle = "#0092DD";

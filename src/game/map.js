@@ -17,9 +17,12 @@ export const MAP = (() => {
     );
   const range = (a, b) => Array.from({ length: b - a }, (_, i) => a + i);
 
-  // ── BORDER TREES ─────────────────────────────────────────────────────────────
-  fill([0, 1, MAP_HEIGHT - 1, MAP_HEIGHT - 2], range(0, MAP_WIDTH), TILE.TREE);
+  // ── BORDERS ──────────────────────────────────────────────────────────────────
+  // Side and bottom borders — trees
+  fill([MAP_HEIGHT - 1, MAP_HEIGHT - 2], range(0, MAP_WIDTH), TILE.TREE);
   fill(range(0, MAP_HEIGHT), [0, 1, MAP_WIDTH - 1, MAP_WIDTH - 2], TILE.TREE);
+  // Top border — cliff face (row 0 = top edge, row 1 = cliff face)
+  fill([0, 1], range(2, MAP_WIDTH - 2), TILE.CLIFF);
 
   // ── MAIN PATHS ───────────────────────────────────────────────────────────────
   // Horizontal spine: rows 13-14, cols 3-36
@@ -45,11 +48,14 @@ export const MAP = (() => {
 
   // ── POND ─────────────────────────────────────────────────────────────────────
   // Large scenic pond: rows, cols
-  fill(range(3, 5), range(6, 18), TILE.WATER);
+  fill(range(2, 5), range(6, 18), TILE.WATER);
   fill(range(5, 6), range(9, 18), TILE.WATER);
   fill(range(6, 7), range(9, 16), TILE.WATER);
   fill(range(7, 11), range(10, 13), TILE.WATER);
   fill(range(11, 14), range(0, 13), TILE.WATER);
+
+  // fill([0, 1], range(2, 18), TILE.CLIFF);
+  fill(range(1, 3), range(10, 15), TILE.CLIFF);
 
   // ── FARM FIELD ───────────────────────────────────────────────────────────────
   // Tilled soil east of Library: cols 9-14, rows 20-24

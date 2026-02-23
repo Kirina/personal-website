@@ -32,8 +32,8 @@ const WATERFALL = {
 
 const CLIFF_TOP = {
   middle: [16 * 9, 16 * 3],
-  left: [16 * 8, 16 * 2],
-  right: [16 * 11, 16 * 3],
+  left: [16 * 8, 16 * 1],
+  right: [16 * 11, 16 * 2],
   concave_left_corner: [16 * 8, 16 * 3],
   concave_right_corner: [16 * 11, 16 * 3],
   convex_left_corner: [16 * 5, 16 * 2],
@@ -346,12 +346,13 @@ export function drawTile(ctx, type, x, y, tick) {
 
       // Rows further above the face are on top of the cliff — just grass.
       if (!isBottom && !isJustAboveFace) {
-        if (isCliff(x, y + 1) && isCliff(x, y + 2) && !isCliff(x + 1, y + 2)) {
-          // if tile at bottom is top and right is top -> right convex
+        // if tile at bottom is top
+        if (isCliff(x, y + 1) && isCliff(x, y + 2)) {
+          // if tile right is top -> right convex
           if (
+            !isCliff(x + 1, y + 2) &&
             isCliff(x + 1, y) &&
-            isCliff(x + 1, y + 1) &&
-            !isCliff(x + 1, y + 2)
+            isCliff(x + 1, y + 1)
           ) {
             ctx.drawImage(
               wc,
@@ -364,15 +365,11 @@ export function drawTile(ctx, type, x, y, tick) {
               TILE_SIZE,
               TILE_SIZE,
             );
-          }
-          return;
-        }
-        if (isCliff(x, y + 1) && isCliff(x, y + 2) && !isCliff(x - 1, y + 2)) {
-          // if tile at bottom is top and left is top -> left convex
-          if (
+            // if tile left is top -> left convex
+          } else if (
+            !isCliff(x - 1, y + 2) &&
             isCliff(x - 1, y) &&
-            isCliff(x - 1, y + 1) &&
-            !isCliff(x - 1, y + 2)
+            isCliff(x - 1, y + 1)
           ) {
             ctx.drawImage(
               wc,
@@ -386,9 +383,44 @@ export function drawTile(ctx, type, x, y, tick) {
               TILE_SIZE,
             );
           }
+          // if tile right is not cliff or is bottom
+          else if (
+            !isCliff(x + 1, y) ||
+            (isCliff(x + 1, y) && !isCliff(x + 1, y + 1))
+          ) {
+            ctx.drawImage(
+              wc,
+              CLIFF_TOP.right[0],
+              CLIFF_TOP.right[1],
+              TILE_SIZE,
+              TILE_SIZE,
+              px,
+              py,
+              TILE_SIZE,
+              TILE_SIZE,
+            );
+          }
+          // if tile left is not cliff or is bottom
+          else if (
+            !isCliff(x - 1, y) ||
+            (isCliff(x - 1, y) && !isCliff(x - 1, y + 1))
+          ) {
+            ctx.drawImage(
+              wc,
+              CLIFF_TOP.left[0],
+              CLIFF_TOP.left[1],
+              TILE_SIZE,
+              TILE_SIZE,
+              px,
+              py,
+              TILE_SIZE,
+              TILE_SIZE,
+            );
+          }
+          return;
         }
-        return;
       }
+
       if (isJustAboveFace) {
         // Base middle edge drawn on every cliff-top tile.
         ctx.drawImage(
@@ -418,7 +450,7 @@ export function drawTile(ctx, type, x, y, tick) {
           );
         }
         // Right: no cliff-top to the right, OR face row has cliff diagonally right.
-        if (!isCliff(x + 1, y) || !isCliff(x + 1, y + 1)) {
+        else if (!isCliff(x + 1, y) || !isCliff(x + 1, y + 1)) {
           ctx.drawImage(
             wc,
             CLIFF_TOP.concave_right_corner[0],

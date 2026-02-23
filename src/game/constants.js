@@ -18,5 +18,12 @@ export const TILE = {
   FENCE: 5,
   CHERRY_TREE: 6,
   CLIFF: 7,
+  WATERFALL: 8,
 };
-export const SOLID = new Set([TILE.WATER, TILE.TREE, TILE.FENCE, TILE.CHERRY_TREE, TILE.CLIFF]);
+export const SOLID = new Set([
+  TILE.WATER,
+  TILE.TREE,
+  TILE.FENCE,
+  TILE.CHERRY_TREE,
+  TILE.CLIFF,
+]);

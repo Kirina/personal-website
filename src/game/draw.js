@@ -25,9 +25,18 @@ const WATERFALL = {
   numFrames: 8,
   offsetFrames: 16 * 3,
   height: 16 * 4,
-  left: [0, 16 * 6],
-  middle: [16, 16 * 6],
-  right: [16 * 2, 16 * 6],
+  left_river_top: [0, 16 * 6],
+  left_top: [0, 16 * 7],
+  left_middle: [0, 16 * 8],
+  left_bottom: [0, 16 * 9],
+  middle_river_top: [16, 16 * 6],
+  middle_top: [16, 16 * 7],
+  middle_middle: [16, 16 * 8],
+  middle_bottom: [16, 16 * 9],
+  right_river_top: [16 * 2, 16 * 6],
+  right_top: [16 * 2, 16 * 7],
+  right_middle: [16 * 2, 16 * 8],
+  right_bottom: [16 * 2, 16 * 9],
 };
 
 const CLIFF_TOP = {
@@ -244,7 +253,7 @@ export function drawTile(ctx, type, x, y, tick) {
     }
   } else if (type === TILE.WATER) {
     // Solid blue base for all water
-    ctx.fillStyle = "#0092DD";
+    ctx.fillStyle = "#4C8ED7";
     ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
 
     // Overlay animated edge tiles where water meets non-water
@@ -253,15 +262,20 @@ export function drawTile(ctx, type, x, y, tick) {
       const spriteBlockX =
         (Math.floor(tick / 20) % WATER_ANIM_FRAMES) * WATER_BLOCK_W;
 
+      const isCliffLike = (nx, ny) => {
+        if (nx < 0 || ny < 0 || nx >= MAP_WIDTH || ny >= MAP_HEIGHT)
+          return false;
+        return MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL;
+      };
       const adjacentIsCliff =
-        (y > 0 && MAP[y - 1][x] === TILE.CLIFF) ||
-        MAP[y + 1][x] === TILE.CLIFF ||
-        (x > 0 && y > 0 && MAP[y][x - 1] === TILE.CLIFF) ||
-        (x > 0 && y > 0 && MAP[y][x + 1] === TILE.CLIFF) ||
-        (x > 0 && y > 0 && MAP[y - 1][x - 1] === TILE.CLIFF) ||
-        (x > 0 && y > 0 && MAP[y + 1][x - 1] === TILE.CLIFF) ||
-        (x > 0 && y > 0 && MAP[y - 1][x + 1] === TILE.CLIFF) ||
-        MAP[y + 1][x + 1] === TILE.CLIFF;
+        isCliffLike(x, y - 1) ||
+        isCliffLike(x, y + 1) ||
+        isCliffLike(x - 1, y) ||
+        isCliffLike(x + 1, y) ||
+        isCliffLike(x - 1, y - 1) ||
+        isCliffLike(x - 1, y + 1) ||
+        isCliffLike(x + 1, y - 1) ||
+        isCliffLike(x + 1, y + 1);
 
       const adjacentIsGrass =
         (y > 0 && MAP[y - 1][x] === TILE.GRASS) ||
@@ -289,6 +303,8 @@ export function drawTile(ctx, type, x, y, tick) {
         adjacentIsGrass,
         adjacentIsPath,
       );
+      if (y > 0 && MAP[y - 1][x] === TILE.WATERFALL)
+        drawWaterfall(ctx, x, y - 1, tick);
     }
   } else if (type === TILE.TREE || type === TILE.CHERRY_TREE) {
     // Drawn in a separate depth-sorted pass; nothing to do here.
@@ -326,7 +342,7 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
       );
     }
-  } else if (type === TILE.CLIFF) {
+  } else if (type === TILE.CLIFF || type === TILE.WATERFALL) {
     const wc = SPRITES.waterfallCliff;
     if (wc?.complete) {
       const isCliff = (nx, ny) =>
@@ -334,13 +350,14 @@ export function drawTile(ctx, type, x, y, tick) {
         nx < MAP_WIDTH &&
         ny >= 0 &&
         ny < MAP_HEIGHT &&
-        MAP[ny][nx] === TILE.CLIFF;
+        (MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL);
       const isWater = (nx, ny) =>
         nx >= 0 &&
         nx < MAP_WIDTH &&
         ny >= 0 &&
         ny < MAP_HEIGHT &&
         MAP[ny][nx] === TILE.WATER;
+
       const isBottom = !isCliff(x, y + 1); // face: no cliff below
       const isJustAboveFace = isCliff(x, y + 1) && !isCliff(x, y + 2); // one row above face
 
@@ -531,6 +548,41 @@ export function drawCherryTree(ctx, x, y) {
     CHERRY_TREE.width,
     CHERRY_TREE.height,
   );
+}
+
+function drawWaterfall(ctx, x, bottomRow, tick) {
+  const wc = SPRITES.waterfallCliff;
+  if (!wc?.complete) return;
+
+  // Scan up to find the topmost contiguous waterfall tile in this column.
+  let topRow = bottomRow;
+  while (topRow > 0 && MAP[topRow - 1][x] === TILE.WATERFALL) topRow--;
+
+  const isWaterfall = (nx) =>
+    nx >= 0 && nx < MAP_WIDTH && MAP[bottomRow][nx] === TILE.WATERFALL;
+
+  const L = isWaterfall(x - 1);
+  const R = isWaterfall(x + 1);
+  const side = !L ? "left" : !R ? "right" : "middle";
+
+  const frame = Math.floor(tick / 10) % WATERFALL.numFrames;
+  const frameX = frame * WATERFALL.offsetFrames;
+
+  for (let row = topRow; row <= bottomRow; row++) {
+    // Map distance from bottom → named row. Anything 3+ rows above bottom
+    // repeats river_top (the source-river tile) to fill extra height.
+    const dist = bottomRow - row;
+    const rowKey =
+      dist === 0 ? "bottom" : dist === 1 ? "middle" : dist === 2 ? "top" : "river_top";
+    const [sx, sy] = WATERFALL[`${side}_${rowKey}`];
+    ctx.drawImage(
+      wc,
+      frameX + sx, sy,
+      TILE_SIZE, TILE_SIZE,
+      x * TILE_SIZE, row * TILE_SIZE,
+      TILE_SIZE, TILE_SIZE,
+    );
+  }
 }
 
 export function drawBuilding(ctx, buildingData) {

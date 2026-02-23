@@ -55,8 +55,9 @@ export const MAP = (() => {
   fill(range(11, 14), range(0, 13), TILE.WATER);
 
   // fill([0, 1], range(2, 18), TILE.CLIFF);
-  fill(range(1, 3), range(10, 15), TILE.CLIFF);
-  fill(range(1, 5), range(10, 15), TILE.CLIFF);
+  fill(range(1, 4), range(9, 16), TILE.CLIFF);
+  fill(range(1, 4), range(10, 15), TILE.WATERFALL);
+  fill(range(0, 1), range(10, 15), TILE.WATERFALL);
 
   // ── FARM FIELD ───────────────────────────────────────────────────────────────
   // Tilled soil east of Library: cols 9-14, rows 20-24

@@ -14,12 +14,12 @@ import { BUILDINGS, NPCS } from "./data";
 import {
   drawBuilding,
   drawChar,
-  drawCherryTree,
   drawDialogBg,
   drawTile,
   drawTree,
 } from "./draw";
 import { MAP } from "./map";
+import { SPRITES } from "./sprites";
 
 export function useGameLoop(
   canvasRef,
@@ -213,8 +213,10 @@ export function useGameLoop(
         k.D;
 
       entities.forEach((e) => {
-        if (e.type === "t") drawTree(ctx, e.data.x, e.data.y);
-        else if (e.type === "ct") drawCherryTree(ctx, e.data.x, e.data.y);
+        if (e.type === "t")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.mahoganyTreeTiles);
+        else if (e.type === "ct")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.cherryTreeTiles);
         else if (e.type === "b") drawBuilding(ctx, e.data);
         else if (e.type === "n") {
           const n = e.data,

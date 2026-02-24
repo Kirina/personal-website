@@ -19,6 +19,7 @@ export const TILE = {
   CHERRY_TREE: 6,
   CLIFF: 7,
   WATERFALL: 8,
+  RIVER: 9,
 };
 export const SOLID = new Set([
   TILE.WATER,

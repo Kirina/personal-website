@@ -22,6 +22,8 @@ const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
 
 const RIVER = {
+  numFrames: 8,
+  offsetFrames: 16 * 3,
   left: [0, 16 * 6],
   middle: [16, 16 * 6],
   right: [16 * 2, 16 * 6],
@@ -60,11 +62,6 @@ const CLIFF_BOTTOM = {
   right: [16 * 11, 16 * 4],
 };
 
-const BRIDGE = {
-  src: [16 * 0.5, 0],
-  width: 16 * 5,
-  height: 16 * 3.5,
-};
 // Edge & corner overlay positions [x, y] within each block — adjust to match sheet
 const EDGE_NO_BACKGROUND = {
   // Straight edges
@@ -99,10 +96,9 @@ const FENCE = {
 // Flower position in ALL props seasons sheet (small flower cluster)
 const FLOWER_SRC = [16 * 18, 16 * 3];
 // Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
-const TREE = { src: [0, 16 * 3], width: 16 * 2, height: 16 * 3 };
-// Cherry tree: full-grown spring bloom, frame 4 (x=128) in the 14-frame growth sheet
-const CHERRY_TREE = {
-  src: [16 * 8, 0],
+const TREE = {
+  mahogany: [0, 16 * 3],
+  cherry: [16 * 8, 0],
   width: 16 * 2,
   height: 16 * 3,
 };
@@ -349,6 +345,30 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
       );
     }
+  } else if (type === TILE.RIVER) {
+    const wc = SPRITES.waterfallCliff;
+    if (wc?.complete) {
+      const isRiver = (nx) =>
+        nx >= 0 && nx < MAP_WIDTH && MAP[y][nx] === TILE.RIVER;
+      const side = !isRiver(x - 1)
+        ? "left"
+        : !isRiver(x + 1)
+          ? "right"
+          : "middle";
+      const frame = Math.floor(tick / 10) % RIVER.numFrames;
+      const [sx, sy] = RIVER[side];
+      ctx.drawImage(
+        wc,
+        frame * RIVER.offsetFrames + sx,
+        sy,
+        TILE_SIZE,
+        TILE_SIZE,
+        px,
+        py,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
+    }
   } else if (type === TILE.WATERFALL) {
     // The waterfall sprite drawn by drawWaterfall covers these tiles entirely.
     // Fill blue so any sprite transparency shows water rather than grass.
@@ -361,39 +381,25 @@ export function drawTile(ctx, type, x, y, tick) {
 
 // Draw a tree sprite at tile (x, y). Called in a post-tile pass so neighbouring
 // tiles cannot paint over the sprite.
-export function drawTree(ctx, x, y) {
-  const spritesheet = SPRITES.mahoganyTreeTiles;
+export function drawTree(ctx, x, y, spritesheet) {
+  // const spritesheet = SPRITES.mahoganyTreeTiles;
   if (!spritesheet?.complete) return;
+  let src = TREE.mahogany;
+  if (spritesheet == SPRITES.cherryTreeTiles) {
+    src = TREE.cherry;
+  }
   const px = x * TILE_SIZE;
   const py = y * TILE_SIZE;
   ctx.drawImage(
     spritesheet,
-    TREE.src[0],
-    TREE.src[1],
+    src[0],
+    src[1],
     TREE.width,
     TREE.height,
     px - TILE_SIZE / 2,
     py - TREE.height + TILE_SIZE,
     TREE.width,
     TREE.height,
-  );
-}
-
-export function drawCherryTree(ctx, x, y) {
-  const spritesheet = SPRITES.cherryTreeTiles;
-  if (!spritesheet?.complete) return;
-  const px = x * TILE_SIZE;
-  const py = y * TILE_SIZE;
-  ctx.drawImage(
-    spritesheet,
-    CHERRY_TREE.src[0],
-    CHERRY_TREE.src[1],
-    CHERRY_TREE.width,
-    CHERRY_TREE.height,
-    px - TILE_SIZE / 2,
-    py - CHERRY_TREE.height + TILE_SIZE,
-    CHERRY_TREE.width,
-    CHERRY_TREE.height,
   );
 }
 
@@ -405,7 +411,9 @@ function drawCliff(ctx, px, py, x, y, tick) {
       nx < MAP_WIDTH &&
       ny >= 0 &&
       ny < MAP_HEIGHT &&
-      (MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL);
+      (MAP[ny][nx] === TILE.CLIFF ||
+        MAP[ny][nx] === TILE.WATERFALL ||
+        MAP[ny][nx] === TILE.RIVER);
     const isWater = (nx, ny) =>
       nx >= 0 &&
       nx < MAP_WIDTH &&
@@ -653,7 +661,7 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
     if (spritesheet?.complete) {
       // Cat sheet: 4 cols × 13 rows at 32×32
       // Row 0-2: Walk (down, right, up), Row 6: Sit/idle facing down
-      const catRow = 6; // sitting idle — adjust if needed
+      const catRow = 5; // sitting idle — adjust if needed
       const col = Math.floor(frame) % 4;
       ctx.save();
       ctx.drawImage(

@@ -21,22 +21,19 @@ const PATH_TILE = [16 * 9, 16 * 10];
 const WATER_BLOCK_W = 192;
 const WATER_ANIM_FRAMES = 3;
 
+const RIVER = {
+  left: [0, 16 * 6],
+  middle: [16, 16 * 6],
+  right: [16 * 2, 16 * 6],
+};
+
 const WATERFALL = {
   numFrames: 8,
   offsetFrames: 16 * 3,
-  height: 16 * 4,
-  left_river_top: [0, 16 * 6],
-  left_top: [0, 16 * 7],
-  left_middle: [0, 16 * 8],
-  left_bottom: [0, 16 * 9],
-  middle_river_top: [16, 16 * 6],
-  middle_top: [16, 16 * 7],
-  middle_middle: [16, 16 * 8],
-  middle_bottom: [16, 16 * 9],
-  right_river_top: [16 * 2, 16 * 6],
-  right_top: [16 * 2, 16 * 7],
-  right_middle: [16 * 2, 16 * 8],
-  right_bottom: [16 * 2, 16 * 9],
+  height: 16 * 3,
+  left: [0, 16 * 7],
+  middle: [16, 16 * 7],
+  right: [16 * 2, 16 * 7],
 };
 
 const CLIFF_TOP = {
@@ -112,7 +109,7 @@ const CHERRY_TREE = {
 
 function drawEdges(
   ctx,
-  wt,
+  spritesheet,
   px,
   py,
   x,
@@ -127,7 +124,7 @@ function drawEdges(
   const draw = (edge) => {
     const [ex, ey] = edge;
     ctx.drawImage(
-      wt,
+      spritesheet,
       spriteBlockX + ex,
       ey,
       TILE_SIZE,
@@ -190,8 +187,8 @@ function drawEdges(
 }
 
 export function drawTile(ctx, type, x, y, tick) {
-  const px = x * TILE_SIZE,
-    py = y * TILE_SIZE;
+  const px = x * TILE_SIZE;
+  const py = y * TILE_SIZE;
 
   // Solid green grass base for all tiles
   ctx.fillStyle = "#8DBA64";
@@ -201,11 +198,11 @@ export function drawTile(ctx, type, x, y, tick) {
     // Sprinkle small props decorations on ~20% of grass tiles
     const h = tileHash(x, y);
     if (h % 5 === 0) {
-      const pt = SPRITES.propsTiles;
-      if (pt?.complete) {
+      const spritesheet = SPRITES.propsTiles;
+      if (spritesheet?.complete) {
         const [sx, sy] = GRASS_DECOR[h % GRASS_DECOR.length];
         ctx.drawImage(
-          pt,
+          spritesheet,
           sx,
           sy,
           TILE_SIZE,
@@ -219,11 +216,11 @@ export function drawTile(ctx, type, x, y, tick) {
     }
   } else if (type === TILE.FLOWER) {
     // Overlay flower decoration from props sheet
-    const pt = SPRITES.propsTiles;
-    if (pt?.complete) {
+    const spritesheet = SPRITES.propsTiles;
+    if (spritesheet?.complete) {
       const [fx, fy] = FLOWER_SRC;
       ctx.drawImage(
-        pt,
+        spritesheet,
         fx,
         fy,
         TILE_SIZE,
@@ -235,11 +232,11 @@ export function drawTile(ctx, type, x, y, tick) {
       );
     }
   } else if (type === TILE.PATH) {
-    const pt = SPRITES.grassTiles;
-    if (pt?.complete) {
+    const spritesheet = SPRITES.grassTiles;
+    if (spritesheet?.complete) {
       const [sx, sy] = PATH_TILE;
       ctx.drawImage(
-        pt,
+        spritesheet,
         sx,
         sy,
         TILE_SIZE,
@@ -249,7 +246,17 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
         TILE_SIZE,
       );
-      drawEdges(ctx, pt, px, py, x, y, TILE.PATH, EDGE_NO_BACKGROUND, 0);
+      drawEdges(
+        ctx,
+        spritesheet,
+        px,
+        py,
+        x,
+        y,
+        TILE.PATH,
+        EDGE_NO_BACKGROUND,
+        0,
+      );
     }
   } else if (type === TILE.WATER) {
     // Solid blue base for all water
@@ -342,185 +349,25 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE_SIZE,
       );
     }
-  } else if (type === TILE.CLIFF || type === TILE.WATERFALL) {
-    const wc = SPRITES.waterfallCliff;
-    if (wc?.complete) {
-      const isCliff = (nx, ny) =>
-        nx >= 0 &&
-        nx < MAP_WIDTH &&
-        ny >= 0 &&
-        ny < MAP_HEIGHT &&
-        (MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL);
-      const isWater = (nx, ny) =>
-        nx >= 0 &&
-        nx < MAP_WIDTH &&
-        ny >= 0 &&
-        ny < MAP_HEIGHT &&
-        MAP[ny][nx] === TILE.WATER;
-
-      const isBottom = !isCliff(x, y + 1); // face: no cliff below
-      const isJustAboveFace = isCliff(x, y + 1) && !isCliff(x, y + 2); // one row above face
-
-      // Rows further above the face are on top of the cliff — just grass.
-      if (!isBottom && !isJustAboveFace) {
-        // if tile at bottom is top
-        if (isCliff(x, y + 1) && isCliff(x, y + 2)) {
-          // if tile right is top -> right convex
-          if (
-            !isCliff(x + 1, y + 2) &&
-            isCliff(x + 1, y) &&
-            isCliff(x + 1, y + 1)
-          ) {
-            ctx.drawImage(
-              wc,
-              CLIFF_TOP.convex_right_corner[0],
-              CLIFF_TOP.convex_right_corner[1],
-              TILE_SIZE,
-              TILE_SIZE,
-              px,
-              py,
-              TILE_SIZE,
-              TILE_SIZE,
-            );
-            // if tile left is top -> left convex
-          } else if (
-            !isCliff(x - 1, y + 2) &&
-            isCliff(x - 1, y) &&
-            isCliff(x - 1, y + 1)
-          ) {
-            ctx.drawImage(
-              wc,
-              CLIFF_TOP.convex_left_corner[0],
-              CLIFF_TOP.convex_left_corner[1],
-              TILE_SIZE,
-              TILE_SIZE,
-              px,
-              py,
-              TILE_SIZE,
-              TILE_SIZE,
-            );
-          }
-          // if tile right is not cliff or is bottom
-          else if (
-            !isCliff(x + 1, y) ||
-            (isCliff(x + 1, y) && !isCliff(x + 1, y + 1))
-          ) {
-            ctx.drawImage(
-              wc,
-              CLIFF_TOP.right[0],
-              CLIFF_TOP.right[1],
-              TILE_SIZE,
-              TILE_SIZE,
-              px,
-              py,
-              TILE_SIZE,
-              TILE_SIZE,
-            );
-          }
-          // if tile left is not cliff or is bottom
-          else if (
-            !isCliff(x - 1, y) ||
-            (isCliff(x - 1, y) && !isCliff(x - 1, y + 1))
-          ) {
-            ctx.drawImage(
-              wc,
-              CLIFF_TOP.left[0],
-              CLIFF_TOP.left[1],
-              TILE_SIZE,
-              TILE_SIZE,
-              px,
-              py,
-              TILE_SIZE,
-              TILE_SIZE,
-            );
-          }
-          return;
-        }
-      }
-
-      if (isJustAboveFace) {
-        // Base middle edge drawn on every cliff-top tile.
-        ctx.drawImage(
-          wc,
-          CLIFF_TOP.middle[0],
-          CLIFF_TOP.middle[1],
-          TILE_SIZE,
-          TILE_SIZE,
-          px,
-          py,
-          TILE_SIZE,
-          TILE_SIZE,
-        );
-        // Corner overlays — drawn on top, like water's cvxTL/cvxTR.
-        // Left: no cliff-top to the left, OR face row has cliff diagonally left.
-        if (!isCliff(x - 1, y) || !isCliff(x - 1, y + 1)) {
-          ctx.drawImage(
-            wc,
-            CLIFF_TOP.concave_left_corner[0],
-            CLIFF_TOP.concave_left_corner[1],
-            TILE_SIZE,
-            TILE_SIZE,
-            px,
-            py,
-            TILE_SIZE,
-            TILE_SIZE,
-          );
-        }
-        // Right: no cliff-top to the right, OR face row has cliff diagonally right.
-        else if (!isCliff(x + 1, y) || !isCliff(x + 1, y + 1)) {
-          ctx.drawImage(
-            wc,
-            CLIFF_TOP.concave_right_corner[0],
-            CLIFF_TOP.concave_right_corner[1],
-            TILE_SIZE,
-            TILE_SIZE,
-            px,
-            py,
-            TILE_SIZE,
-            TILE_SIZE,
-          );
-        }
-      } else {
-        const L = isCliff(x - 1, y),
-          R = isCliff(x + 1, y);
-        let set, frameX;
-        if (isWater(x, y + 1)) {
-          ctx.fillStyle = "#0092DD";
-          ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-          // Animated water cliff — face row meets water
-          const frame = Math.floor(tick / 20) % CLIFF_WATER_BOTTOM.numFrames;
-          frameX = frame * CLIFF_WATER_BOTTOM.offsetFrames;
-          set = CLIFF_WATER_BOTTOM;
-        } else {
-          set = CLIFF_BOTTOM;
-          frameX = 0;
-        }
-        const [sx, sy] = !L ? set.left : !R ? set.right : set.middle;
-        ctx.drawImage(
-          wc,
-          frameX + sx,
-          sy,
-          TILE_SIZE,
-          TILE_SIZE,
-          px,
-          py,
-          TILE_SIZE,
-          TILE_SIZE,
-        );
-      }
-    }
+  } else if (type === TILE.WATERFALL) {
+    // The waterfall sprite drawn by drawWaterfall covers these tiles entirely.
+    // Fill blue so any sprite transparency shows water rather than grass.
+    ctx.fillStyle = "#4C8ED7";
+    ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+  } else if (type === TILE.CLIFF) {
+    drawCliff(ctx, px, py, x, y, tick);
   }
 }
 
 // Draw a tree sprite at tile (x, y). Called in a post-tile pass so neighbouring
 // tiles cannot paint over the sprite.
 export function drawTree(ctx, x, y) {
-  const mt = SPRITES.mahoganyTreeTiles;
-  if (!mt?.complete) return;
+  const spritesheet = SPRITES.mahoganyTreeTiles;
+  if (!spritesheet?.complete) return;
   const px = x * TILE_SIZE;
   const py = y * TILE_SIZE;
   ctx.drawImage(
-    mt,
+    spritesheet,
     TREE.src[0],
     TREE.src[1],
     TREE.width,
@@ -533,12 +380,12 @@ export function drawTree(ctx, x, y) {
 }
 
 export function drawCherryTree(ctx, x, y) {
-  const ct = SPRITES.cherryTreeTiles;
-  if (!ct?.complete) return;
+  const spritesheet = SPRITES.cherryTreeTiles;
+  if (!spritesheet?.complete) return;
   const px = x * TILE_SIZE;
   const py = y * TILE_SIZE;
   ctx.drawImage(
-    ct,
+    spritesheet,
     CHERRY_TREE.src[0],
     CHERRY_TREE.src[1],
     CHERRY_TREE.width,
@@ -550,39 +397,204 @@ export function drawCherryTree(ctx, x, y) {
   );
 }
 
-function drawWaterfall(ctx, x, bottomRow, tick) {
-  const wc = SPRITES.waterfallCliff;
-  if (!wc?.complete) return;
+function drawCliff(ctx, px, py, x, y, tick) {
+  const spritesheet = SPRITES.waterfallCliff;
+  if (spritesheet?.complete) {
+    const isCliff = (nx, ny) =>
+      nx >= 0 &&
+      nx < MAP_WIDTH &&
+      ny >= 0 &&
+      ny < MAP_HEIGHT &&
+      (MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL);
+    const isWater = (nx, ny) =>
+      nx >= 0 &&
+      nx < MAP_WIDTH &&
+      ny >= 0 &&
+      ny < MAP_HEIGHT &&
+      MAP[ny][nx] === TILE.WATER;
 
-  // Scan up to find the topmost contiguous waterfall tile in this column.
-  let topRow = bottomRow;
-  while (topRow > 0 && MAP[topRow - 1][x] === TILE.WATERFALL) topRow--;
+    const isBottom = !isCliff(x, y + 1); // face: no cliff below
+    const isJustAboveFace = isCliff(x, y + 1) && !isCliff(x, y + 2); // one row above face
+
+    // Rows further above the face are on top of the cliff — just grass.
+    if (!isBottom && !isJustAboveFace) {
+      // if tile at bottom is top
+      if (isCliff(x, y + 1) && isCliff(x, y + 2)) {
+        // if tile right is top -> right convex
+        if (
+          !isCliff(x + 1, y + 2) &&
+          isCliff(x + 1, y) &&
+          isCliff(x + 1, y + 1)
+        ) {
+          ctx.drawImage(
+            spritesheet,
+            CLIFF_TOP.convex_right_corner[0],
+            CLIFF_TOP.convex_right_corner[1],
+            TILE_SIZE,
+            TILE_SIZE,
+            px,
+            py,
+            TILE_SIZE,
+            TILE_SIZE,
+          );
+          // if tile left is top -> left convex
+        } else if (
+          !isCliff(x - 1, y + 2) &&
+          isCliff(x - 1, y) &&
+          isCliff(x - 1, y + 1)
+        ) {
+          ctx.drawImage(
+            spritesheet,
+            CLIFF_TOP.convex_left_corner[0],
+            CLIFF_TOP.convex_left_corner[1],
+            TILE_SIZE,
+            TILE_SIZE,
+            px,
+            py,
+            TILE_SIZE,
+            TILE_SIZE,
+          );
+        }
+        // if tile right is not cliff or is bottom
+        else if (
+          !isCliff(x + 1, y) ||
+          (isCliff(x + 1, y) && !isCliff(x + 1, y + 1))
+        ) {
+          ctx.drawImage(
+            spritesheet,
+            CLIFF_TOP.right[0],
+            CLIFF_TOP.right[1],
+            TILE_SIZE,
+            TILE_SIZE,
+            px,
+            py,
+            TILE_SIZE,
+            TILE_SIZE,
+          );
+        }
+        // if tile left is not cliff or is bottom
+        else if (
+          !isCliff(x - 1, y) ||
+          (isCliff(x - 1, y) && !isCliff(x - 1, y + 1))
+        ) {
+          ctx.drawImage(
+            spritesheet,
+            CLIFF_TOP.left[0],
+            CLIFF_TOP.left[1],
+            TILE_SIZE,
+            TILE_SIZE,
+            px,
+            py,
+            TILE_SIZE,
+            TILE_SIZE,
+          );
+        }
+        return;
+      }
+    }
+
+    if (isJustAboveFace) {
+      // Base middle edge drawn on every cliff-top tile.
+      ctx.drawImage(
+        spritesheet,
+        CLIFF_TOP.middle[0],
+        CLIFF_TOP.middle[1],
+        TILE_SIZE,
+        TILE_SIZE,
+        px,
+        py,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
+      // Corner overlays — drawn on top, like water's cvxTL/cvxTR.
+      // Left: no cliff-top to the left, OR face row has cliff diagonally left.
+      if (!isCliff(x - 1, y) || !isCliff(x - 1, y + 1)) {
+        ctx.drawImage(
+          spritesheet,
+          CLIFF_TOP.concave_left_corner[0],
+          CLIFF_TOP.concave_left_corner[1],
+          TILE_SIZE,
+          TILE_SIZE,
+          px,
+          py,
+          TILE_SIZE,
+          TILE_SIZE,
+        );
+      }
+      // Right: no cliff-top to the right, OR face row has cliff diagonally right.
+      else if (!isCliff(x + 1, y) || !isCliff(x + 1, y + 1)) {
+        ctx.drawImage(
+          spritesheet,
+          CLIFF_TOP.concave_right_corner[0],
+          CLIFF_TOP.concave_right_corner[1],
+          TILE_SIZE,
+          TILE_SIZE,
+          px,
+          py,
+          TILE_SIZE,
+          TILE_SIZE,
+        );
+      }
+    } else {
+      const left_tile = isCliff(x - 1, y),
+        right_tile = isCliff(x + 1, y);
+      let set, frameX;
+      if (isWater(x, y + 1)) {
+        ctx.fillStyle = "#4C8ED7";
+        ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+        // Animated water cliff — face row meets water
+        const frame = Math.floor(tick / 20) % CLIFF_WATER_BOTTOM.numFrames;
+        frameX = frame * CLIFF_WATER_BOTTOM.offsetFrames;
+        set = CLIFF_WATER_BOTTOM;
+      } else {
+        set = CLIFF_BOTTOM;
+        frameX = 0;
+      }
+      const [sx, sy] = !left_tile
+        ? set.left
+        : !right_tile
+          ? set.right
+          : set.middle;
+      ctx.drawImage(
+        spritesheet,
+        frameX + sx,
+        sy,
+        TILE_SIZE,
+        TILE_SIZE,
+        px,
+        py,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
+    }
+  }
+}
+
+function drawWaterfall(ctx, x, bottomRow, tick) {
+  const spritesheet = SPRITES.waterfallCliff;
+  if (!spritesheet?.complete) return;
 
   const isWaterfall = (nx) =>
     nx >= 0 && nx < MAP_WIDTH && MAP[bottomRow][nx] === TILE.WATERFALL;
-
-  const L = isWaterfall(x - 1);
-  const R = isWaterfall(x + 1);
-  const side = !L ? "left" : !R ? "right" : "middle";
+  const side = !isWaterfall(x - 1)
+    ? "left"
+    : !isWaterfall(x + 1)
+      ? "right"
+      : "middle";
 
   const frame = Math.floor(tick / 10) % WATERFALL.numFrames;
-  const frameX = frame * WATERFALL.offsetFrames;
-
-  for (let row = topRow; row <= bottomRow; row++) {
-    // Map distance from bottom → named row. Anything 3+ rows above bottom
-    // repeats river_top (the source-river tile) to fill extra height.
-    const dist = bottomRow - row;
-    const rowKey =
-      dist === 0 ? "bottom" : dist === 1 ? "middle" : dist === 2 ? "top" : "river_top";
-    const [sx, sy] = WATERFALL[`${side}_${rowKey}`];
-    ctx.drawImage(
-      wc,
-      frameX + sx, sy,
-      TILE_SIZE, TILE_SIZE,
-      x * TILE_SIZE, row * TILE_SIZE,
-      TILE_SIZE, TILE_SIZE,
-    );
-  }
+  const [sx, sy] = WATERFALL[side];
+  ctx.drawImage(
+    spritesheet,
+    frame * WATERFALL.offsetFrames + sx,
+    sy,
+    TILE_SIZE,
+    WATERFALL.height,
+    x * TILE_SIZE,
+    (bottomRow - 2) * TILE_SIZE,
+    TILE_SIZE,
+    WATERFALL.height,
+  );
 }
 
 export function drawBuilding(ctx, buildingData) {
@@ -590,9 +602,9 @@ export function drawBuilding(ctx, buildingData) {
     py = buildingData.y * TILE_SIZE,
     pw = buildingData.spriteWidth * TILE_SIZE,
     ph = buildingData.spriteHeight * TILE_SIZE;
-  const img = SPRITES[buildingData.spriteKey];
+  const spritesheet = SPRITES[buildingData.spriteKey];
 
-  if (img?.complete) {
+  if (spritesheet?.complete) {
     const sx = buildingData.spriteX ?? 0,
       sy = buildingData.spriteY ?? 0;
     if (buildingData.spriteW !== undefined) {
@@ -601,7 +613,7 @@ export function drawBuilding(ctx, buildingData) {
       const sw = buildingData.spriteW,
         sh = buildingData.spriteH;
       ctx.drawImage(
-        img,
+        spritesheet,
         sx,
         sy,
         sw,
@@ -614,7 +626,7 @@ export function drawBuilding(ctx, buildingData) {
     } else {
       // Dedicated file: stretch to fill the tile footprint with one-tile roof overhang.
       ctx.drawImage(
-        img,
+        spritesheet,
         sx,
         sy,
         pw,
@@ -637,15 +649,15 @@ export function drawBuilding(ctx, buildingData) {
 export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
   // Cat uses its own single sheet with different layout
   if (isCat) {
-    const img = SPRITES[spriteKey];
-    if (img?.complete) {
+    const spritesheet = SPRITES[spriteKey];
+    if (spritesheet?.complete) {
       // Cat sheet: 4 cols × 13 rows at 32×32
       // Row 0-2: Walk (down, right, up), Row 6: Sit/idle facing down
       const catRow = 6; // sitting idle — adjust if needed
       const col = Math.floor(frame) % 4;
       ctx.save();
       ctx.drawImage(
-        img,
+        spritesheet,
         col * CHAR_SIZE,
         catRow * CHAR_SIZE,
         CHAR_SIZE,
@@ -663,9 +675,9 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
   // Humanoid characters
   const idleKey = spriteKey + "Idle";
   const walkKey = spriteKey + "Walk";
-  const img = SPRITES[isMoving ? walkKey : idleKey] || SPRITES[idleKey];
+  const spritesheet = SPRITES[isMoving ? walkKey : idleKey] || SPRITES[idleKey];
 
-  if (img?.complete) {
+  if (spritesheet?.complete) {
     // Direction → spritesheet row
     // dir: 0=down, 1=up, 2=left, 3=right
     // Sheet layout: Row 0 = Down, Row 1 = Up, Row 2 = Right
@@ -685,7 +697,7 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
       ctx.translate(dx + CHAR_SIZE, dy);
       ctx.scale(-1, 1);
       ctx.drawImage(
-        img,
+        spritesheet,
         col * CHAR_SIZE,
         row * CHAR_SIZE,
         CHAR_SIZE,
@@ -697,7 +709,7 @@ export function drawChar(ctx, x, y, dir, frame, spriteKey, isMoving, isCat) {
       );
     } else {
       ctx.drawImage(
-        img,
+        spritesheet,
         col * CHAR_SIZE,
         row * CHAR_SIZE,
         CHAR_SIZE,
@@ -719,8 +731,8 @@ const DIALOG_SRC = { sx: 0, sy: 0, sw: 80, sh: 48 };
 const DIALOG_CORNER = 8; // corner slice size in source pixels
 
 export function drawDialogBg(ctx, x, y, w, h) {
-  const img = SPRITES.dialogBox;
-  if (!img?.complete) {
+  const spritesheet = SPRITES.dialogBox;
+  if (!spritesheet?.complete) {
     // Fallback: solid dark background
     ctx.fillStyle = "rgba(10,10,30,0.95)";
     ctx.fillRect(x, y, w, h);
@@ -735,14 +747,14 @@ export function drawDialogBg(ctx, x, y, w, h) {
 
   // 9-slice drawing: corners, edges, and center
   // Top-left corner
-  ctx.drawImage(img, sx, sy, c, c, x, y, c, c);
+  ctx.drawImage(spritesheet, sx, sy, c, c, x, y, c, c);
   // Top-right corner
-  ctx.drawImage(img, sx + sw - c, sy, c, c, x + w - c, y, c, c);
+  ctx.drawImage(spritesheet, sx + sw - c, sy, c, c, x + w - c, y, c, c);
   // Bottom-left corner
-  ctx.drawImage(img, sx, sy + sh - c, c, c, x, y + h - c, c, c);
+  ctx.drawImage(spritesheet, sx, sy + sh - c, c, c, x, y + h - c, c, c);
   // Bottom-right corner
   ctx.drawImage(
-    img,
+    spritesheet,
     sx + sw - c,
     sy + sh - c,
     c,
@@ -753,10 +765,10 @@ export function drawDialogBg(ctx, x, y, w, h) {
     c,
   );
   // Top edge
-  ctx.drawImage(img, sx + c, sy, sw - 2 * c, c, x + c, y, w - 2 * c, c);
+  ctx.drawImage(spritesheet, sx + c, sy, sw - 2 * c, c, x + c, y, w - 2 * c, c);
   // Bottom edge
   ctx.drawImage(
-    img,
+    spritesheet,
     sx + c,
     sy + sh - c,
     sw - 2 * c,
@@ -767,10 +779,10 @@ export function drawDialogBg(ctx, x, y, w, h) {
     c,
   );
   // Left edge
-  ctx.drawImage(img, sx, sy + c, c, sh - 2 * c, x, y + c, c, h - 2 * c);
+  ctx.drawImage(spritesheet, sx, sy + c, c, sh - 2 * c, x, y + c, c, h - 2 * c);
   // Right edge
   ctx.drawImage(
-    img,
+    spritesheet,
     sx + sw - c,
     sy + c,
     c,
@@ -782,7 +794,7 @@ export function drawDialogBg(ctx, x, y, w, h) {
   );
   // Center fill
   ctx.drawImage(
-    img,
+    spritesheet,
     sx + c,
     sy + c,
     sw - 2 * c,

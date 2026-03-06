@@ -13,18 +13,16 @@ export const TILE = {
   GRASS: 0,
   PATH: 1,
   WATER: 2,
-  FLOWER: 3,
-  TREE: 4,
-  FENCE: 5,
-  CHERRY_TREE: 6,
   CLIFF: 7,
   WATERFALL: 8,
   RIVER: 9,
 };
-export const SOLID = new Set([
-  TILE.WATER,
-  TILE.TREE,
-  TILE.FENCE,
-  TILE.CHERRY_TREE,
-  TILE.CLIFF,
-]);
+export const SOLID = new Set([TILE.WATER, TILE.CLIFF]);
+
+export const OBJ = {
+  TREE: 1,
+  CHERRY_TREE: 2,
+  FLOWER: 3,
+  FENCE: 4,
+};
+export const OBJ_SOLID = new Set([OBJ.TREE, OBJ.CHERRY_TREE, OBJ.FENCE]);

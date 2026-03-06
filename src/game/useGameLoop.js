@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import {
   MAP_HEIGHT,
   MAP_WIDTH,
+  OBJ,
+  OBJ_SOLID,
   PLAYER_SPEED,
   SCALE,
   SOLID,
@@ -10,11 +12,12 @@ import {
   VIEW_HEIGHT,
   VIEW_WIDTH,
 } from "./constants";
-import { BUILDINGS, NPCS } from "./data";
+import { BUILDINGS, MAP_OBJECTS, NPCS } from "./data";
 import {
   drawBuilding,
   drawChar,
   drawDialogBg,
+  drawFlatObject,
   drawTile,
   drawTree,
 } from "./draw";
@@ -84,6 +87,7 @@ export function useGameLoop(
         return true;
       }
       if (SOLID.has(tile)) return true;
+      if (OBJ_SOLID.has(MAP_OBJECTS[ty][tx])) return true;
       for (const b of BUILDINGS)
         if (
           px >= b.x * TILE_SIZE &&
@@ -183,13 +187,21 @@ export function useGameLoop(
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
           drawTile(ctx, MAP[y][x], x, y, s.tick);
 
-      // Collect visible tree tiles for depth-sorted rendering
+      // Flat object pass: flowers and fences (no depth-sort needed)
+      for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
+        for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++) {
+          const obj = MAP_OBJECTS[y][x];
+          if (obj === OBJ.FLOWER || obj === OBJ.FENCE)
+            drawFlatObject(ctx, obj, x, y, MAP_OBJECTS);
+        }
+
+      // Collect visible tree objects for depth-sorted rendering
       const trees = [];
       for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
-          if (MAP[y][x] === TILE.TREE)
+          if (MAP_OBJECTS[y][x] === OBJ.TREE)
             trees.push({ type: "t", y: (y + 1) * TILE_SIZE, data: { x, y } });
-          else if (MAP[y][x] === TILE.CHERRY_TREE)
+          else if (MAP_OBJECTS[y][x] === OBJ.CHERRY_TREE)
             trees.push({ type: "ct", y: (y + 1) * TILE_SIZE, data: { x, y } });
 
       // Collect all entities and sort by Y for depth

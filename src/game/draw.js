@@ -1,4 +1,4 @@
-import { CHAR_SIZE, MAP_HEIGHT, MAP_WIDTH, TILE, TILE_SIZE } from "./constants";
+import { CHAR_SIZE, MAP_HEIGHT, MAP_WIDTH, OBJ, TILE, TILE_SIZE } from "./constants";
 import { MAP } from "./map";
 import { SPRITES } from "./sprites";
 
@@ -210,23 +210,6 @@ export function drawTile(ctx, type, x, y, tick) {
         );
       }
     }
-  } else if (type === TILE.FLOWER) {
-    // Overlay flower decoration from props sheet
-    const spritesheet = SPRITES.propsTiles;
-    if (spritesheet?.complete) {
-      const [fx, fy] = FLOWER_SRC;
-      ctx.drawImage(
-        spritesheet,
-        fx,
-        fy,
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
-    }
   } else if (type === TILE.PATH) {
     const spritesheet = SPRITES.grassTiles;
     if (spritesheet?.complete) {
@@ -309,42 +292,6 @@ export function drawTile(ctx, type, x, y, tick) {
       if (y > 0 && MAP[y - 1][x] === TILE.WATERFALL)
         drawWaterfall(ctx, x, y - 1, tick);
     }
-  } else if (type === TILE.TREE || type === TILE.CHERRY_TREE) {
-    // Drawn in a separate depth-sorted pass; nothing to do here.
-  } else if (type === TILE.FENCE) {
-    const ft = SPRITES.fenceTiles;
-    if (ft?.complete) {
-      const isF = (nx, ny) =>
-        nx >= 0 &&
-        nx < MAP_WIDTH &&
-        ny >= 0 &&
-        ny < MAP_HEIGHT &&
-        MAP[ny][nx] === TILE.FENCE;
-      const L = isF(x - 1, y),
-        R = isF(x + 1, y);
-      const U = isF(x, y - 1),
-        D = isF(x, y + 1);
-      let src;
-      if (!L && R && !U && D) src = FENCE.left_top_corner;
-      else if (L && !R && !U && D) src = FENCE.right_top_corner;
-      else if (!L && R && U && !D) src = FENCE.left_bottom_corner;
-      else if (L && !R && U && !D) src = FENCE.right_bottom_corner;
-      else if (!L && R && !U && !D) src = FENCE.left_end;
-      else if (L && !R && !U && !D) src = FENCE.right_end;
-      else if (L || R) src = FENCE.horizontal;
-      else src = FENCE.vertical;
-      ctx.drawImage(
-        ft,
-        src[0],
-        src[1],
-        TILE_SIZE,
-        TILE_SIZE,
-        px,
-        py,
-        TILE_SIZE,
-        TILE_SIZE,
-      );
-    }
   } else if (type === TILE.RIVER) {
     const wc = SPRITES.waterfallCliff;
     if (wc?.complete) {
@@ -376,6 +323,40 @@ export function drawTile(ctx, type, x, y, tick) {
     ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
   } else if (type === TILE.CLIFF) {
     drawCliff(ctx, px, py, x, y, tick);
+  }
+}
+
+// Draw flat objects (flowers, fences) on top of the floor pass.
+// objMap is the MAP_OBJECTS 2D array, needed for fence neighbour detection.
+export function drawFlatObject(ctx, type, x, y, objMap) {
+  const px = x * TILE_SIZE;
+  const py = y * TILE_SIZE;
+
+  if (type === OBJ.FLOWER) {
+    const spritesheet = SPRITES.propsTiles;
+    if (spritesheet?.complete) {
+      const [fx, fy] = FLOWER_SRC;
+      ctx.drawImage(spritesheet, fx, fy, TILE_SIZE, TILE_SIZE, px, py, TILE_SIZE, TILE_SIZE);
+    }
+  } else if (type === OBJ.FENCE) {
+    const ft = SPRITES.fenceTiles;
+    if (ft?.complete) {
+      const isF = (nx, ny) =>
+        nx >= 0 && nx < MAP_WIDTH && ny >= 0 && ny < MAP_HEIGHT &&
+        objMap[ny][nx] === OBJ.FENCE;
+      const L = isF(x - 1, y), R = isF(x + 1, y);
+      const U = isF(x, y - 1), D = isF(x, y + 1);
+      let src;
+      if (!L && R && !U && D) src = FENCE.left_top_corner;
+      else if (L && !R && !U && D) src = FENCE.right_top_corner;
+      else if (!L && R && U && !D) src = FENCE.left_bottom_corner;
+      else if (L && !R && U && !D) src = FENCE.right_bottom_corner;
+      else if (!L && R && !U && !D) src = FENCE.left_end;
+      else if (L && !R && !U && !D) src = FENCE.right_end;
+      else if (L || R) src = FENCE.horizontal;
+      else src = FENCE.vertical;
+      ctx.drawImage(ft, src[0], src[1], TILE_SIZE, TILE_SIZE, px, py, TILE_SIZE, TILE_SIZE);
+    }
   }
 }
 

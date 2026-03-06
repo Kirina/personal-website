@@ -1,4 +1,4 @@
-import { TILE_SIZE } from "./constants";
+import { MAP_HEIGHT, MAP_WIDTH, OBJ, TILE_SIZE } from "./constants";
 
 // === BUILDINGS ===
 export const BUILDINGS = [
@@ -74,6 +74,120 @@ export const BUILDINGS = [
     },
   },
 ];
+
+// === MAP OBJECTS ===
+// All objects placed on top of floor tiles: trees, flowers, fences.
+// Stored as a 2D array parallel to MAP. null = no object.
+export const MAP_OBJECTS = (() => {
+  const m = Array.from({ length: MAP_HEIGHT }, () =>
+    Array(MAP_WIDTH).fill(null),
+  );
+  const set = (y, x, t) => {
+    if (y >= 0 && y < MAP_HEIGHT && x >= 0 && x < MAP_WIDTH) m[y][x] = t;
+  };
+  const fill = (ys, xs, t) =>
+    ys.forEach((y) => xs.forEach((x) => set(y, x, t)));
+  const range = (a, b) => Array.from({ length: b - a }, (_, i) => a + i);
+
+  // ── BORDERS ──────────────────────────────────────────────────────────────────
+  fill([MAP_HEIGHT - 1, MAP_HEIGHT - 2], range(0, MAP_WIDTH), OBJ.TREE);
+  fill(range(0, MAP_HEIGHT), [0, 1, MAP_WIDTH - 1, MAP_WIDTH - 2], OBJ.TREE);
+  // Clear left-border trees where water extends to the edge (rows 11-13)
+  [11, 12, 13].forEach((y) => {
+    set(y, 0, null);
+    set(y, 1, null);
+  });
+
+  // ── CHERRY BLOSSOM GROVE ─────────────────────────────────────────────────────
+  [
+    [3, 21],
+    [3, 24],
+    [3, 36],
+    [4, 21],
+    [4, 35],
+    [5, 21],
+    [5, 36],
+    [6, 22],
+    [6, 35],
+    [7, 24],
+    [7, 36],
+    [8, 21],
+    [8, 35],
+    [9, 22],
+    [10, 36],
+    // Scattered cherry trees elsewhere
+    [11, 37],
+    [17, 3],
+    [25, 20],
+    [24, 37],
+  ].forEach(([y, x]) => set(y, x, OBJ.CHERRY_TREE));
+
+  // ── DECORATIVE TREES ─────────────────────────────────────────────────────────
+  [
+    [3, 20],
+    [4, 20],
+    [5, 20],
+    [9, 20],
+    [11, 20],
+    [3, 26],
+    [4, 26],
+    [9, 26],
+    [11, 26],
+    [15, 3],
+    [16, 3],
+    [22, 3],
+    [25, 3],
+    [26, 3],
+    [15, 37],
+    [16, 37],
+    [22, 37],
+    [25, 37],
+    [26, 37],
+    [16, 22],
+    [16, 26],
+    [22, 22],
+    [22, 26],
+    [25, 24],
+    [26, 22],
+  ].forEach(([y, x]) => set(y, x, OBJ.TREE));
+
+  // ── FLOWERS ──────────────────────────────────────────────────────────────────
+  [
+    [9, 25],
+    [10, 25],
+    [12, 20],
+    [12, 25],
+    [15, 4],
+    [15, 8],
+    [15, 20],
+    [15, 25],
+    [17, 8],
+    [17, 9],
+    [17, 26],
+    [17, 27],
+    [22, 8],
+    [23, 8],
+    [22, 26],
+    [23, 26],
+    [16, 15],
+    [16, 17],
+    [16, 23],
+    [16, 27],
+    [24, 17],
+    [24, 25],
+    [26, 17],
+    [26, 25],
+    [11, 23],
+    [11, 25],
+  ].forEach(([y, x]) => set(y, x, OBJ.FLOWER));
+
+  // ── FARM FENCE ───────────────────────────────────────────────────────────────
+  fill([19], range(9, 16), OBJ.FENCE);
+  fill(range(20, 25), [15], OBJ.FENCE);
+  set(19, 15, OBJ.FENCE); // top-right corner
+
+  return m;
+})();
 
 // === NPCs ===
 export const NPCS = [

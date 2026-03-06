@@ -71,11 +71,19 @@ export function useGameLoop(
     window.addEventListener("keydown", onKD);
     window.addEventListener("keyup", onKU);
 
+    const isLand = (t) => t !== TILE.WATER && !SOLID.has(t);
     const isSolid = (px, py) => {
       const tx = Math.floor(px / TILE_SIZE),
         ty = Math.floor(py / TILE_SIZE);
       if (tx < 0 || ty < 0 || tx >= MAP_WIDTH || ty >= MAP_HEIGHT) return true;
-      if (SOLID.has(MAP[ty][tx])) return true;
+      const tile = MAP[ty][tx];
+      if (tile === TILE.WATER) {
+        // The top edge of a water tile (land above) is walkable shore.
+        const localY = py - ty * TILE_SIZE;
+        if (ty > 0 && isLand(MAP[ty - 1][tx]) && localY < TILE_SIZE / 2) return false;
+        return true;
+      }
+      if (SOLID.has(tile)) return true;
       for (const b of BUILDINGS)
         if (
           px >= b.x * TILE_SIZE &&

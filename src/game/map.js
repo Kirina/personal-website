@@ -22,29 +22,17 @@ export const MAP = (() => {
   fill([MAP_HEIGHT - 1, MAP_HEIGHT - 2], range(0, MAP_WIDTH), TILE.TREE);
   fill(range(0, MAP_HEIGHT), [0, 1, MAP_WIDTH - 1, MAP_WIDTH - 2], TILE.TREE);
   // Top border — cliff face (row 0 = top edge, row 1 = cliff face)
-  fill([0, 1], range(2, MAP_WIDTH - 2), TILE.CLIFF);
+  fill([0, 1], range(2, 20), TILE.CLIFF);
 
   // ── MAIN PATHS ───────────────────────────────────────────────────────────────
   // Horizontal spine: rows 13-14, cols 3-36
-  fill([13, 14], range(3, 37), TILE.PATH);
-  // Vertical spine: cols 18-19, rows 3-26
-  fill(range(3, 27), [18, 19], TILE.PATH);
+  fill([13, 14], range(13, 37), TILE.PATH);
 
-  // Branch to Home — cols 6-7 rows 9-12, with slight jog at rows 8-9
-  fill(range(9, 13), [6, 7], TILE.PATH);
-  fill([8, 9], [5, 6, 7], TILE.PATH);
+  // Branch to Home — rows 9-12,  cols 31-32, with slight jog
 
-  // Branch to Workshop — cols 31-32 rows 9-12, with slight jog
-  fill(range(9, 13), [31, 32], TILE.PATH);
-  fill([8, 9], [31, 32, 33], TILE.PATH);
-
-  // Branch to Library — cols 6-7 rows 15-22, with slight jog near building
-  fill(range(15, 23), [6, 7], TILE.PATH);
-  fill([17, 18], [5, 6, 7], TILE.PATH);
-
-  // Branch to Garden — cols 31-32 rows 15-21, with slight jog
-  fill(range(15, 22), [31, 32], TILE.PATH);
-  fill([17, 18], [30, 31, 32], TILE.PATH);
+  fill([7, 8], [27, 28, 29], TILE.PATH);
+  fill(range(7, 11), [27, 28], TILE.PATH);
+  fill(range(10, 15), [26, 27], TILE.PATH);
 
   // ── POND ─────────────────────────────────────────────────────────────────────
   // Large scenic pond: rows, cols

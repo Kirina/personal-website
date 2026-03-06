@@ -22,7 +22,7 @@ export const BUILDINGS = [
   },
   {
     x: 27,
-    y: 4,
+    y: 1,
     spriteWidth: 5,
     spriteHeight: 8,
     spriteX: 16 * 6,

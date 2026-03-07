@@ -1,4 +1,4 @@
-import { MAP_HEIGHT, MAP_WIDTH, TILE } from "./constants";
+import { MAP_HEIGHT, MAP_WIDTH, TILE } from "./spriteConstants";
 
 // === MAP ===
 // Floor textures only: GRASS, PATH, WATER, CLIFF, WATERFALL, RIVER.

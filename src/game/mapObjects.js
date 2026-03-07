@@ -1,4 +1,4 @@
-import { MAP_HEIGHT, MAP_WIDTH, OBJ, TILE_SIZE } from "./constants";
+import { MAP_HEIGHT, MAP_WIDTH, OBJ, TILE_SIZE } from "./spriteConstants";
 
 // === BUILDINGS ===
 export const BUILDINGS = [

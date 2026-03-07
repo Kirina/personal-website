@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { SCALE, TILE_SIZE, VIEW_HEIGHT, VIEW_WIDTH } from "./game/constants";
+import { SCALE, TILE_SIZE, VIEW_HEIGHT, VIEW_WIDTH } from "./game/spriteConstants";
 import { useGameLoop } from "./game/useGameLoop";
 
 // === MAIN COMPONENT ===

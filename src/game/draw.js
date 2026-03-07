@@ -1,6 +1,13 @@
-import { CHAR_SIZE, MAP_HEIGHT, MAP_WIDTH, OBJ, TILE, TILE_SIZE } from "./constants";
-import { MAP } from "./map";
-import { SPRITES } from "./sprites";
+import { MAP } from "./mapTextures";
+import {
+  CHAR_SIZE,
+  MAP_HEIGHT,
+  MAP_WIDTH,
+  OBJ,
+  TILE,
+  TILE_SIZE,
+} from "./spriteConstants";
+import { SPRITES } from "./spriteFiles";
 
 // Tile source rects in tilesets — adjust these to match your tileset layout.
 // Format: [sourceX, sourceY] in pixels within the spritesheet.
@@ -336,26 +343,51 @@ export function drawFlatObject(ctx, type, x, y, objMap) {
     const spritesheet = SPRITES.propsTiles;
     if (spritesheet?.complete) {
       const [fx, fy] = FLOWER_SRC;
-      ctx.drawImage(spritesheet, fx, fy, TILE_SIZE, TILE_SIZE, px, py, TILE_SIZE, TILE_SIZE);
+      ctx.drawImage(
+        spritesheet,
+        fx,
+        fy,
+        TILE_SIZE,
+        TILE_SIZE,
+        px,
+        py,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
     }
   } else if (type === OBJ.FENCE) {
     const ft = SPRITES.fenceTiles;
     if (ft?.complete) {
-      const isF = (nx, ny) =>
-        nx >= 0 && nx < MAP_WIDTH && ny >= 0 && ny < MAP_HEIGHT &&
+      const isFence = (nx, ny) =>
+        nx >= 0 &&
+        nx < MAP_WIDTH &&
+        ny >= 0 &&
+        ny < MAP_HEIGHT &&
         objMap[ny][nx] === OBJ.FENCE;
-      const L = isF(x - 1, y), R = isF(x + 1, y);
-      const U = isF(x, y - 1), D = isF(x, y + 1);
+      const Left = isFence(x - 1, y),
+        Right = isFence(x + 1, y);
+      const Up = isFence(x, y - 1),
+        Down = isFence(x, y + 1);
       let src;
-      if (!L && R && !U && D) src = FENCE.left_top_corner;
-      else if (L && !R && !U && D) src = FENCE.right_top_corner;
-      else if (!L && R && U && !D) src = FENCE.left_bottom_corner;
-      else if (L && !R && U && !D) src = FENCE.right_bottom_corner;
-      else if (!L && R && !U && !D) src = FENCE.left_end;
-      else if (L && !R && !U && !D) src = FENCE.right_end;
-      else if (L || R) src = FENCE.horizontal;
+      if (!Left && Right && !Up && Down) src = FENCE.left_top_corner;
+      else if (Left && !Right && !Up && Down) src = FENCE.right_top_corner;
+      else if (!Left && Right && Up && !Down) src = FENCE.left_bottom_corner;
+      else if (Left && !Right && Up && !Down) src = FENCE.right_bottom_corner;
+      else if (!Left && Right && !Up && !Down) src = FENCE.left_end;
+      else if (Left && !Right && !Up && !Down) src = FENCE.right_end;
+      else if (Left || Right) src = FENCE.horizontal;
       else src = FENCE.vertical;
-      ctx.drawImage(ft, src[0], src[1], TILE_SIZE, TILE_SIZE, px, py, TILE_SIZE, TILE_SIZE);
+      ctx.drawImage(
+        ft,
+        src[0],
+        src[1],
+        TILE_SIZE,
+        TILE_SIZE,
+        px,
+        py,
+        TILE_SIZE,
+        TILE_SIZE,
+      );
     }
   }
 }

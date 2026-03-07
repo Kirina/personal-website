@@ -1,5 +1,15 @@
 import { useEffect } from "react";
 import {
+  drawBuilding,
+  drawChar,
+  drawDialogBg,
+  drawFlatObject,
+  drawTile,
+  drawTree,
+} from "./draw";
+import { BUILDINGS, MAP_OBJECTS, NPCS } from "./mapObjects";
+import { MAP } from "./mapTextures";
+import {
   MAP_HEIGHT,
   MAP_WIDTH,
   OBJ,
@@ -11,18 +21,8 @@ import {
   TILE_SIZE,
   VIEW_HEIGHT,
   VIEW_WIDTH,
-} from "./constants";
-import { BUILDINGS, MAP_OBJECTS, NPCS } from "./data";
-import {
-  drawBuilding,
-  drawChar,
-  drawDialogBg,
-  drawFlatObject,
-  drawTile,
-  drawTree,
-} from "./draw";
-import { MAP } from "./map";
-import { SPRITES } from "./sprites";
+} from "./spriteConstants";
+import { SPRITES } from "./spriteFiles";
 
 export function useGameLoop(
   canvasRef,
@@ -83,10 +83,34 @@ export function useGameLoop(
       if (tile === TILE.WATER) {
         // The top edge of a water tile (land above) is walkable shore.
         const localY = py - ty * TILE_SIZE;
-        if (ty > 0 && isLand(MAP[ty - 1][tx]) && localY < TILE_SIZE / 2) return false;
+        if (ty > 0 && isLand(MAP[ty - 1][tx]) && localY < TILE_SIZE / 2)
+          return false;
         return true;
       }
       if (SOLID.has(tile)) return true;
+      if (MAP_OBJECTS[ty][tx] === OBJ.FENCE) {
+        const localY = py - ty * TILE_SIZE;
+        const localX = px - tx * TILE_SIZE;
+        const isFence = (nx, ny) =>
+          nx >= 0 &&
+          nx < MAP_WIDTH &&
+          ny >= 0 &&
+          ny < MAP_HEIGHT &&
+          MAP_OBJECTS[ny][nx] === OBJ.FENCE;
+        const Left = isFence(tx - 1, ty),
+          Right = isFence(tx + 1, ty);
+        const Up = isFence(tx, ty - 1),
+          Down = isFence(tx, ty + 1);
+        const onPost =
+          localX >= 5 && localX <= 11 && localY >= 13 && localY <= 15;
+        const hRailY = localY >= 13 && localY <= 15;
+        const vRailX = localX >= 5 && localX <= 11;
+        const onRailL = Left && localX >= 1 && localX <= 4 && hRailY;
+        const onRailR = Right && localX >= 12 && localX <= 14 && hRailY;
+        const onRailU = Up && localY >= 1 && localY <= 7 && vRailX;
+        const onRailD = Down && localY >= 15 && vRailX;
+        return onPost || onRailL || onRailR || onRailU || onRailD;
+      }
       if (OBJ_SOLID.has(MAP_OBJECTS[ty][tx])) return true;
       for (const b of BUILDINGS)
         if (
@@ -187,22 +211,24 @@ export function useGameLoop(
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
           drawTile(ctx, MAP[y][x], x, y, s.tick);
 
-      // Flat object pass: flowers and fences (no depth-sort needed)
+      // Flat object pass: flowers only
+      for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
+        for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
+          if (MAP_OBJECTS[y][x] === OBJ.FLOWER)
+            drawFlatObject(ctx, OBJ.FLOWER, x, y, MAP_OBJECTS);
+
+      // Collect visible trees and fences for depth-sorted rendering
+      const trees = [];
       for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
         for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++) {
           const obj = MAP_OBJECTS[y][x];
-          if (obj === OBJ.FLOWER || obj === OBJ.FENCE)
-            drawFlatObject(ctx, obj, x, y, MAP_OBJECTS);
-        }
-
-      // Collect visible tree objects for depth-sorted rendering
-      const trees = [];
-      for (let y = sy; y < Math.min(MAP_HEIGHT, sy + VIEW_HEIGHT + 2); y++)
-        for (let x = sx; x < Math.min(MAP_WIDTH, sx + VIEW_WIDTH + 2); x++)
-          if (MAP_OBJECTS[y][x] === OBJ.TREE)
+          if (obj === OBJ.TREE)
             trees.push({ type: "t", y: (y + 1) * TILE_SIZE, data: { x, y } });
-          else if (MAP_OBJECTS[y][x] === OBJ.CHERRY_TREE)
+          else if (obj === OBJ.CHERRY_TREE)
             trees.push({ type: "ct", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (obj === OBJ.FENCE)
+            trees.push({ type: "f", y: (y + 1) * TILE_SIZE, data: { x, y } });
+        }
 
       // Collect all entities and sort by Y for depth
       const entities = [
@@ -237,6 +263,8 @@ export function useGameLoop(
           drawTree(ctx, e.data.x, e.data.y, SPRITES.mahoganyTreeTiles);
         else if (e.type === "ct")
           drawTree(ctx, e.data.x, e.data.y, SPRITES.cherryTreeTiles);
+        else if (e.type === "f")
+          drawFlatObject(ctx, OBJ.FENCE, e.data.x, e.data.y, MAP_OBJECTS);
         else if (e.type === "b") drawBuilding(ctx, e.data);
         else if (e.type === "n") {
           const n = e.data,

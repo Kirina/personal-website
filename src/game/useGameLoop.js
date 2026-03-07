@@ -97,19 +97,23 @@ export function useGameLoop(
           ny >= 0 &&
           ny < MAP_HEIGHT &&
           MAP_OBJECTS[ny][nx] === OBJ.FENCE;
-        const Left = isFence(tx - 1, ty),
-          Right = isFence(tx + 1, ty);
-        const Up = isFence(tx, ty - 1),
-          Down = isFence(tx, ty + 1);
-        const onPost =
-          localX >= 5 && localX <= 11 && localY >= 13 && localY <= 15;
-        const hRailY = localY >= 13 && localY <= 15;
-        const vRailX = localX >= 5 && localX <= 11;
-        const onRailL = Left && localX >= 1 && localX <= 4 && hRailY;
-        const onRailR = Right && localX >= 12 && localX <= 14 && hRailY;
-        const onRailU = Up && localY >= 1 && localY <= 7 && vRailX;
-        const onRailD = Down && localY >= 15 && vRailX;
-        return onPost || onRailL || onRailR || onRailU || onRailD;
+        const fenceLeft = isFence(tx - 1, ty),
+          fenceRight = isFence(tx + 1, ty);
+        const fenceUp = isFence(tx, ty - 1),
+          fenceDown = isFence(tx, ty + 1);
+
+        const horizontalRailY = localY >= 12 && localY <= 16;
+        const verticalRailX = localX >= 3 && localX <= 12;
+        const onPost = horizontalRailY && verticalRailX;
+        const onRailLeft =
+          fenceLeft && localX >= 0 && localX <= 8 && horizontalRailY;
+        const onRailRight =
+          fenceRight && localX >= 8 && localX <= 16 && horizontalRailY;
+        const onRailUp =
+          fenceUp && localY >= 0 && localY <= 16 && verticalRailX;
+        const onRailDown =
+          fenceDown && localY >= 0 && localY >= 16 && verticalRailX;
+        return onPost || onRailLeft || onRailRight || onRailUp || onRailDown;
       }
       if (OBJ_SOLID.has(MAP_OBJECTS[ty][tx])) return true;
       for (const b of BUILDINGS)

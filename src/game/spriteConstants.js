@@ -26,15 +26,3 @@ export const OBJ = {
   FENCE: 4,
 };
 export const OBJ_SOLID = new Set([OBJ.TREE, OBJ.CHERRY_TREE, OBJ.FENCE]);
-
-// export const FENCE = {
-//   horizontal: [16, 16 * 2],
-//   vertical: [0, 16],
-//   horizontal_left_end: [16, 16 * 3],
-//   horizontal_right_end: [16 * 2, 16 * 3],
-//   vertical_end: [16 * 2, 16 * 4],
-//   left_top_corner: [0, 0],
-//   right_top_corner: [16 * 2, 0],
-//   left_bottom_corner: [0, 16 * 2],
-//   right_bottom_corner: [16 * 2, 16 * 2],
-// };

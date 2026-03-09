@@ -87,14 +87,14 @@ const EDGE_NO_BACKGROUND = {
   ccvBL: [16 * 5, 16 * 6], // diagonal bottom-left is grass
   ccvBR: [16 * 6, 16 * 6], // diagonal bottom-right is grass
 };
-const isCurrent = (x, y, Current) =>
-  x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT && MAP[y][x] === Current;
+
 // Fence tiles from fence-wood sheet (6 cols × 10 rows at 16×16)
-const FENCE = {
+export const FENCE = {
   horizontal: [16, 16 * 2],
   vertical: [0, 16],
-  left_end: [16, 16 * 3],
-  right_end: [16 * 2, 16 * 3],
+  horizontal_left_end: [16, 16 * 3],
+  horizontal_right_end: [16 * 2, 16 * 3],
+  vertical_end: [16 * 2, 16 * 4],
   left_top_corner: [0, 0],
   right_top_corner: [16 * 2, 0],
   left_bottom_corner: [0, 16 * 2],
@@ -110,6 +110,10 @@ const TREE = {
   height: 16 * 3,
 };
 
+// returns true if tile matches tile type given
+const isTileType = (x, y, type) =>
+  x >= 0 && x < MAP_WIDTH && y >= 0 && y < MAP_HEIGHT && MAP[y][x] === type;
+
 function drawEdges(
   ctx,
   spritesheet,
@@ -117,12 +121,9 @@ function drawEdges(
   py,
   x,
   y,
-  tile,
+  currentTile,
   edge,
   spriteBlockX,
-  adjacentIsCliff = false, // for water borders
-  adjacentIsGrass = true, // for water borders
-  adjacentIsPath = true, // for water borders
 ) {
   const draw = (edge) => {
     const [ex, ey] = edge;
@@ -138,54 +139,83 @@ function drawEdges(
       TILE_SIZE,
     );
   };
-  // When skipTop is set, treat the top as if it were the same tile (no top edge).
-  const topTile = !adjacentIsCliff && !isCurrent(x, y - 1, tile);
-  const bottomTile = !isCurrent(x, y + 1, tile);
-  const leftTile = !isCurrent(x - 1, y, tile);
-  const rightTile = !isCurrent(x + 1, y, tile);
 
-  // Convex corners (two adjacent cardinal sides are non-same-tile)
-  if (topTile && leftTile) draw(edge.cvxTL);
-  if (topTile && rightTile) draw(edge.cvxTR);
-  if (bottomTile && leftTile) draw(edge.cvxBL);
-  if (bottomTile && rightTile) draw(edge.cvxBR);
+  const isCliffLike = (x, y) => {
+    return isTileType(x, y, TILE.CLIFF) || isTileType(x, y, TILE.WATERFALL);
+  };
+
+  let adjacentIsCliff = {
+    top: isCliffLike(x, y - 1),
+    bottom: isCliffLike(x, y + 1),
+    left: isCliffLike(x - 1, y),
+    right: isCliffLike(x + 1, y),
+    leftTop: isCliffLike(x - 1, y - 1),
+    leftBottom: isCliffLike(x - 1, y + 1),
+    rightTop: isCliffLike(x + 1, y - 1),
+    rightBottom: isCliffLike(x + 1, y + 1),
+  };
+
+  const topTile = !isTileType(x, y - 1, currentTile) && !adjacentIsCliff.top;
+  const bottomTile =
+    !isTileType(x, y + 1, currentTile) && !adjacentIsCliff.bottom;
+  const leftTile = !isTileType(x - 1, y, currentTile) && !adjacentIsCliff.left;
+  const rightTile =
+    !isTileType(x + 1, y, currentTile) && !adjacentIsCliff.right;
+
+  // Convex corners (two adjacent corner sides are non-same-tile)
+  if (topTile && leftTile && !adjacentIsCliff.top && !adjacentIsCliff.left)
+    draw(edge.cvxTL);
+  if (topTile && rightTile && !adjacentIsCliff.top && !adjacentIsCliff.right)
+    draw(edge.cvxTR);
+  if (
+    bottomTile &&
+    leftTile &&
+    !adjacentIsCliff.bottom &&
+    !adjacentIsCliff.left
+  )
+    draw(edge.cvxBL);
+  if (
+    bottomTile &&
+    rightTile &&
+    !adjacentIsCliff.bottom &&
+    !adjacentIsCliff.right
+  )
+    draw(edge.cvxBR);
 
   // Straight edges (only one cardinal side is non-same-tile)
-  if (topTile && !leftTile && !rightTile) draw(edge.top);
+  if (
+    topTile &&
+    (!leftTile || adjacentIsCliff.left) &&
+    (!rightTile || adjacentIsCliff.right)
+  )
+    draw(edge.top);
   if (bottomTile && !leftTile && !rightTile) draw(edge.bottom);
-  if (
-    (adjacentIsGrass || adjacentIsPath) &&
-    leftTile &&
-    !topTile &&
-    !bottomTile
-  )
-    draw(edge.left);
-  if (
-    (adjacentIsGrass || adjacentIsPath) &&
-    rightTile &&
-    !topTile &&
-    !bottomTile
-  )
-    draw(edge.right);
+  if (leftTile && !topTile && !bottomTile) draw(edge.left);
+  if (rightTile && !topTile && !bottomTile) draw(edge.right);
 
   // Concave corners (all cardinal neighbors are same-tile, diagonal is not)
   if (
-    !adjacentIsCliff &&
+    !adjacentIsCliff.leftTop &&
     !topTile &&
     !leftTile &&
-    !isCurrent(x - 1, y - 1, tile)
+    !isTileType(x - 1, y - 1, currentTile)
   )
     draw(edge.ccvTL);
   if (
-    !adjacentIsCliff &&
+    !adjacentIsCliff.rightTop &&
     !topTile &&
     !rightTile &&
-    !isCurrent(x + 1, y - 1, tile)
+    !isTileType(x + 1, y - 1, currentTile)
   )
     draw(edge.ccvTR);
-  if (!bottomTile && !leftTile && !isCurrent(x - 1, y + 1, tile))
+  if (!bottomTile && !leftTile && !isTileType(x - 1, y + 1, currentTile))
     draw(edge.ccvBL);
-  if (!bottomTile && !rightTile && !isCurrent(x + 1, y + 1, tile))
+  if (
+    !bottomTile &&
+    !rightTile &&
+    !isTileType(x + 1, y + 1, currentTile) &&
+    !adjacentIsCliff.rightBottom
+  )
     draw(edge.ccvBR);
 }
 
@@ -255,33 +285,6 @@ export function drawTile(ctx, type, x, y, tick) {
       const spriteBlockX =
         (Math.floor(tick / 20) % WATER_ANIM_FRAMES) * WATER_BLOCK_W;
 
-      const isCliffLike = (nx, ny) => {
-        if (nx < 0 || ny < 0 || nx >= MAP_WIDTH || ny >= MAP_HEIGHT)
-          return false;
-        return MAP[ny][nx] === TILE.CLIFF || MAP[ny][nx] === TILE.WATERFALL;
-      };
-      const adjacentIsCliff =
-        isCliffLike(x, y - 1) ||
-        isCliffLike(x, y + 1) ||
-        isCliffLike(x - 1, y) ||
-        isCliffLike(x + 1, y) ||
-        isCliffLike(x - 1, y - 1) ||
-        isCliffLike(x - 1, y + 1) ||
-        isCliffLike(x + 1, y - 1) ||
-        isCliffLike(x + 1, y + 1);
-
-      const adjacentIsGrass =
-        (y > 0 && MAP[y - 1][x] === TILE.GRASS) ||
-        MAP[y + 1][x] === TILE.GRASS ||
-        (x > 0 && MAP[y][x - 1] === TILE.GRASS) ||
-        MAP[y][x + 1] === TILE.GRASS;
-
-      const adjacentIsPath =
-        (y > 0 && MAP[y - 1][x] === TILE.PATH) ||
-        MAP[y + 1][x] === TILE.PATH ||
-        (x > 0 && MAP[y][x - 1] === TILE.PATH) ||
-        MAP[y][x + 1] === TILE.PATH;
-
       drawEdges(
         ctx,
         wt,
@@ -292,9 +295,6 @@ export function drawTile(ctx, type, x, y, tick) {
         TILE.WATER,
         EDGE_NO_BACKGROUND,
         spriteBlockX,
-        adjacentIsCliff,
-        adjacentIsGrass,
-        adjacentIsPath,
       );
       if (y > 0 && MAP[y - 1][x] === TILE.WATERFALL)
         drawWaterfall(ctx, x, y - 1, tick);
@@ -373,8 +373,8 @@ export function drawFlatObject(ctx, type, x, y, objMap) {
       else if (Left && !Right && !Up && Down) src = FENCE.right_top_corner;
       else if (!Left && Right && Up && !Down) src = FENCE.left_bottom_corner;
       else if (Left && !Right && Up && !Down) src = FENCE.right_bottom_corner;
-      else if (!Left && Right && !Up && !Down) src = FENCE.left_end;
-      else if (Left && !Right && !Up && !Down) src = FENCE.right_end;
+      else if (!Left && Right && !Up && !Down) src = FENCE.horizontal_left_end;
+      else if (Left && !Right && !Up && !Down) src = FENCE.horizontal_right_end;
       else if (Left || Right) src = FENCE.horizontal;
       else src = FENCE.vertical;
       ctx.drawImage(

@@ -21,7 +21,7 @@ export const BUILDINGS = [
     },
   },
   {
-    x: 26,
+    x: 24,
     y: 4,
     spriteWidth: 5,
     spriteHeight: 8,
@@ -100,15 +100,6 @@ export const MAP_OBJECTS = (() => {
 
   // ── CHERRY BLOSSOM GROVE ─────────────────────────────────────────────────────
   [
-    [3, 36],
-    [4, 35],
-    [5, 36],
-    [6, 35],
-    [7, 36],
-    [8, 35],
-    [10, 36],
-    // Scattered cherry trees elsewhere
-    [11, 37],
     [17, 3],
     [25, 20],
     [24, 37],
@@ -132,6 +123,16 @@ export const MAP_OBJECTS = (() => {
     [22, 26],
     [25, 24],
     [26, 22],
+    [2, 31],
+    [2, 34],
+    [3, 35],
+    [3, 30],
+    [2, 29],
+    [0, 30],
+    [0, 35],
+    [1, 28],
+    [1, 36],
+    [2, 37],
   ].forEach(([y, x]) => set(y, x, OBJ.TREE));
 
   // ── FLOWERS ──────────────────────────────────────────────────────────────────
@@ -170,9 +171,12 @@ export const MAP_OBJECTS = (() => {
   set(19, 15, OBJ.FENCE); // top-right corner
 
   fill([3], [18], OBJ.FENCE);
-  fill(range(3, 5), [19], OBJ.FENCE);
-  fill([5], range(19, 22), OBJ.FENCE);
+  fill(range(3, 6), [19], OBJ.FENCE);
+  fill([6], range(19, 22), OBJ.FENCE);
   // fill([6], [22], OBJ.FENCE);
+
+  // ── TREE PORTAL ──────────────────────────────────────────────────────────────
+  set(3, 32, OBJ.TREE_PORTAL);
 
   return m;
 })();

@@ -24,6 +24,7 @@ export const OBJ = {
   CHERRY_TREE: 2,
   FLOWER: 3,
   FENCE: 4,
+  TREE_PORTAL: 5,
 };
 export const OBJ_SOLID = new Set([OBJ.TREE, OBJ.CHERRY_TREE, OBJ.FENCE]);
 
@@ -119,7 +120,7 @@ export const TREE = {
 };
 
 export const TREE_PORTAL = {
-  image: [0, 16 * 3],
-  width: [16 * 3],
-  height: [16 * 3],
+  image: [16 * 3, 0],
+  width: 16 * 3,
+  height: 16 * 3,
 };

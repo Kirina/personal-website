@@ -22,8 +22,12 @@ loadImg("waterfallCliff", "/assets/tiles/waterfall-cliff.png");
 
 // Props
 loadImg("propsTiles", "/assets/props/grass-water.png");
-loadImg("mahoganyTreeTiles", "/assets/props/mahogany-tree.png");
 loadImg("fenceTiles", "/assets/props/fence-wood.png");
+
+loadImg("mapleTreeTiles", "/assets/props/maple-tree.png");
+loadImg("pineTreeTiles", "/assets/props/pine-tree.png");
+loadImg("birchTreeTiles", "/assets/props/birch-tree.png");
+loadImg("mahoganyTreeTiles", "/assets/props/mahogany-tree.png");
 loadImg("cherryTreeTiles", "/assets/props/cherry-tree.png");
 loadImg("treePortal", "/assets/props/tree-portal.png");
 

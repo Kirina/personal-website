@@ -16,6 +16,7 @@ import {
   TILE,
   TILE_SIZE,
   TREE,
+  TREE_PORTAL,
   WATER_ANIM_FRAMES,
   WATER_BLOCK_W,
   WATERFALL,
@@ -312,14 +313,24 @@ export function drawFlatObject(ctx, type, x, y, objMap) {
 // Draw a tree sprite at tile (x, y). Called in a post-tile pass so neighbouring
 // tiles cannot paint over the sprite.
 export function drawTree(ctx, x, y, spritesheet) {
-  // const spritesheet = SPRITES.mahoganyTreeTiles;
   if (!spritesheet?.complete) return;
-  let src = TREE.mahogany;
-  if (spritesheet == SPRITES.cherryTreeTiles) {
-    src = TREE.cherry;
-  }
   const px = x * TILE_SIZE;
   const py = y * TILE_SIZE;
+  if (spritesheet === SPRITES.treePortal) {
+    ctx.drawImage(
+      spritesheet,
+      TREE_PORTAL.image[0],
+      TREE_PORTAL.image[1],
+      TREE_PORTAL.width,
+      TREE_PORTAL.height,
+      px - TILE_SIZE / 2,
+      py - TREE_PORTAL.height + TILE_SIZE,
+      TREE_PORTAL.width,
+      TREE_PORTAL.height,
+    );
+    return;
+  }
+  const src = spritesheet === SPRITES.cherryTreeTiles ? TREE.cherry : TREE.mahogany;
   ctx.drawImage(
     spritesheet,
     src[0],

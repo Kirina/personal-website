@@ -19,6 +19,7 @@ import {
   SOLID,
   TILE,
   TILE_SIZE,
+  TREE_PORTAL,
   VIEW_HEIGHT,
   VIEW_WIDTH,
 } from "./spriteConstants";
@@ -131,6 +132,26 @@ export function useGameLoop(
           fenceDown && localY >= 0 && localY >= 16 && verticalRailX;
         return onPost || onRailLeft || onRailRight || onRailUp || onRailDown;
       }
+      {
+        // Portal sprite is drawn at anchor*TILE_SIZE - TILE_SIZE/2, spanning TREE_PORTAL.width.
+        // Candidate anchors: tx-2 through tx+1 (sprite can start up to 8px into prev tile).
+        let anchorTx = null;
+        for (const c of [tx - 2, tx - 1, tx, tx + 1]) {
+          if (c >= 0 && MAP_OBJECTS[ty]?.[c] === OBJ.TREE_PORTAL) {
+            const sl = c * TILE_SIZE - TILE_SIZE / 2;
+            if (px >= sl && px < sl + TREE_PORTAL.width) { anchorTx = c; break; }
+          }
+        }
+        if (anchorTx !== null) {
+          const localY = py - ty * TILE_SIZE;
+          if (localY < TILE_SIZE * 0.75) return false;
+          const spriteLeft = anchorTx * TILE_SIZE - TILE_SIZE / 2;
+          const third = TREE_PORTAL.width / 3;
+          const localX = px - spriteLeft;
+          const isCentre = localX >= third && localX < third * 2;
+          return !isCentre;
+        }
+      }
       if (OBJ_SOLID.has(MAP_OBJECTS[ty][tx])) return true;
       for (const b of BUILDINGS)
         if (
@@ -241,6 +262,8 @@ export function useGameLoop(
             trees.push({ type: "t", y: (y + 1) * TILE_SIZE, data: { x, y } });
           else if (obj === OBJ.CHERRY_TREE)
             trees.push({ type: "ct", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (obj === OBJ.TREE_PORTAL)
+            trees.push({ type: "tp", y: (y + 1) * TILE_SIZE, data: { x, y } });
           else if (obj === OBJ.FENCE)
             trees.push({ type: "f", y: (y + 1) * TILE_SIZE, data: { x, y } });
         }
@@ -278,6 +301,8 @@ export function useGameLoop(
           drawTree(ctx, e.data.x, e.data.y, SPRITES.mahoganyTreeTiles);
         else if (e.type === "ct")
           drawTree(ctx, e.data.x, e.data.y, SPRITES.cherryTreeTiles);
+        else if (e.type === "tp")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.treePortal);
         else if (e.type === "f")
           drawFlatObject(ctx, OBJ.FENCE, e.data.x, e.data.y, MAP_OBJECTS);
         else if (e.type === "b") drawBuilding(ctx, e.data);

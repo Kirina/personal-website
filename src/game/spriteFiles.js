@@ -18,12 +18,13 @@ const loadImg = (key, src) => {
 loadImg("grassTiles", "/assets/tiles/grass-spring.png");
 loadImg("waterTiles", "/assets/tiles/grass-water-spring.png");
 loadImg("pathTiles", "/assets/tiles/tilled-soil.png");
-loadImg("propsTiles", "/assets/tiles/props.png");
-loadImg("mahoganyTreeTiles", "/assets/tiles/mahogany-tree.png");
-loadImg("fenceTiles", "/assets/tiles/fence-wood.png");
-loadImg("cherryTreeTiles", "/assets/tiles/cherry-tree.png");
 loadImg("waterfallCliff", "/assets/tiles/waterfall-cliff.png");
-loadImg("bridge", "/assets/tiles/bridge.png");
+
+// Props
+loadImg("propsTiles", "/assets/props/grass-water.png");
+loadImg("mahoganyTreeTiles", "/assets/props/mahogany-tree.png");
+loadImg("fenceTiles", "/assets/props/fence-wood.png");
+loadImg("cherryTreeTiles", "/assets/props/cherry-tree.png");
 
 // Buildings (pre-composed)
 loadImg("home", "/assets/buildings/home.png");
@@ -37,7 +38,9 @@ loadImg("playerIdle", "/assets/characters/player-idle.png");
 loadImg("playerWalk", "/assets/characters/player-walk.png");
 loadImg("npcGuideIdle", "/assets/characters/npc-guide-idle.png");
 loadImg("npcSageIdle", "/assets/characters/npc-sage-idle.png");
-loadImg("cat", "/assets/characters/cat.png");
+
+// Animals
+loadImg("cat", "/assets/animals/cat.png");
 
 // UI
 loadImg("dialogBox", "/assets/ui/dialogue-box.png");

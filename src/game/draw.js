@@ -1,114 +1,29 @@
 import { MAP } from "./mapTextures";
 import {
   CHAR_SIZE,
+  CLIFF_BOTTOM,
+  CLIFF_TOP,
+  CLIFF_WATER_BOTTOM,
+  EDGE_NO_BACKGROUND,
+  FENCE,
+  FLOWER_SRC,
+  GRASS_DECOR,
   MAP_HEIGHT,
   MAP_WIDTH,
   OBJ,
+  PATH_TILE,
+  RIVER,
   TILE,
   TILE_SIZE,
+  TREE,
+  WATER_ANIM_FRAMES,
+  WATER_BLOCK_W,
+  WATERFALL,
 } from "./spriteConstants";
 import { SPRITES } from "./spriteFiles";
 
-// Tile source rects in tilesets — adjust these to match your tileset layout.
-// Format: [sourceX, sourceY] in pixels within the spritesheet.
-// The grass tileset uses autotile blocks (4 cols × 6 rows per terrain).
-// Inner fill tiles (no edges) are at offset (1,2) within each block.
-// Small decorations from props.png to sprinkle on grass tiles
-const GRASS_DECOR = [
-  [0, 0], // grass tuft 1
-  [16, 0], // grass tuft 2
-  [32, 0], // grass tuft 3
-  [48, 0], // small plant
-];
 // Simple hash to deterministically pick which tiles get decoration
 const tileHash = (x, y) => ((x * 2654435761) ^ (y * 2246822519)) >>> 0;
-// Tilled soil inner fill tile
-const PATH_TILE = [16 * 9, 16 * 10];
-
-const WATER_BLOCK_W = 192;
-const WATER_ANIM_FRAMES = 3;
-
-const RIVER = {
-  numFrames: 8,
-  offsetFrames: 16 * 3,
-  left: [0, 16 * 6],
-  middle: [16, 16 * 6],
-  right: [16 * 2, 16 * 6],
-};
-
-const WATERFALL = {
-  numFrames: 8,
-  offsetFrames: 16 * 3,
-  height: 16 * 3,
-  left: [0, 16 * 7],
-  middle: [16, 16 * 7],
-  right: [16 * 2, 16 * 7],
-};
-
-const CLIFF_TOP = {
-  middle: [16 * 9, 16 * 3],
-  left: [16 * 8, 16 * 1],
-  right: [16 * 11, 16 * 2],
-  concave_left_corner: [16 * 8, 16 * 3],
-  concave_right_corner: [16 * 11, 16 * 3],
-  convex_left_corner: [16 * 5, 16 * 2],
-  convex_right_corner: [16 * 6, 16 * 2],
-};
-
-const CLIFF_WATER_BOTTOM = {
-  numFrames: 4,
-  offsetFrames: 16 * 3,
-  left: [0, 16 * 5],
-  middle: [16, 16 * 5],
-  right: [16 * 2, 16 * 5],
-};
-
-const CLIFF_BOTTOM = {
-  left: [16 * 8, 16 * 4],
-  middle: [16 * 9, 16 * 4],
-  right: [16 * 11, 16 * 4],
-};
-
-// Edge & corner overlay positions [x, y] within each block — adjust to match sheet
-const EDGE_NO_BACKGROUND = {
-  // Straight edges
-  top: [16 * 10, 16 * 4],
-  bottom: [16 * 9, 16 * 7],
-  left: [16 * 8, 16 * 5],
-  right: [16 * 11, 16 * 6],
-  // Convex corners (two cardinal sides are non-water)
-  cvxTL: [16 * 8, 16 * 4], // grass above + left
-  cvxTR: [16 * 11, 16 * 4], // grass above + right
-  cvxBL: [16 * 8, 16 * 7], // grass below + left
-  cvxBR: [16 * 11, 16 * 7], // grass below + right
-  // Concave corners (all cardinal sides are water, but diagonal is not)
-  ccvTL: [16 * 5, 16 * 5], // diagonal top-left is grass
-  ccvTR: [16 * 6, 16 * 5], // diagonal top-right is grass
-  ccvBL: [16 * 5, 16 * 6], // diagonal bottom-left is grass
-  ccvBR: [16 * 6, 16 * 6], // diagonal bottom-right is grass
-};
-
-// Fence tiles from fence-wood sheet (6 cols × 10 rows at 16×16)
-export const FENCE = {
-  horizontal: [16, 16 * 2],
-  vertical: [0, 16],
-  horizontal_left_end: [16, 16 * 3],
-  horizontal_right_end: [16 * 2, 16 * 3],
-  vertical_end: [16 * 2, 16 * 4],
-  left_top_corner: [0, 0],
-  right_top_corner: [16 * 2, 0],
-  left_bottom_corner: [0, 16 * 2],
-  right_bottom_corner: [16 * 2, 16 * 2],
-};
-// Flower position in ALL props seasons sheet (small flower cluster)
-const FLOWER_SRC = [16 * 18, 16 * 3];
-// Mahogany tree source position and size in its sprite sheet (2 tiles wide, 3 tiles tall)
-const TREE = {
-  mahogany: [0, 16 * 3],
-  cherry: [16 * 8, 0],
-  width: 16 * 2,
-  height: 16 * 3,
-};
 
 // returns true if tile matches tile type given
 const isTileType = (x, y, type) =>
@@ -163,32 +78,13 @@ function drawEdges(
     !isTileType(x + 1, y, currentTile) && !adjacentIsCliff.right;
 
   // Convex corners (two adjacent corner sides are non-same-tile)
-  if (topTile && leftTile && !adjacentIsCliff.top && !adjacentIsCliff.left)
-    draw(edge.cvxTL);
-  if (topTile && rightTile && !adjacentIsCliff.top && !adjacentIsCliff.right)
-    draw(edge.cvxTR);
-  if (
-    bottomTile &&
-    leftTile &&
-    !adjacentIsCliff.bottom &&
-    !adjacentIsCliff.left
-  )
-    draw(edge.cvxBL);
-  if (
-    bottomTile &&
-    rightTile &&
-    !adjacentIsCliff.bottom &&
-    !adjacentIsCliff.right
-  )
-    draw(edge.cvxBR);
+  if (topTile && leftTile) draw(edge.cvxTL);
+  if (topTile && rightTile) draw(edge.cvxTR);
+  if (bottomTile && leftTile) draw(edge.cvxBL);
+  if (bottomTile && rightTile) draw(edge.cvxBR);
 
   // Straight edges (only one cardinal side is non-same-tile)
-  if (
-    topTile &&
-    (!leftTile || adjacentIsCliff.left) &&
-    (!rightTile || adjacentIsCliff.right)
-  )
-    draw(edge.top);
+  if (topTile && !leftTile && !rightTile) draw(edge.top);
   if (bottomTile && !leftTile && !rightTile) draw(edge.bottom);
   if (leftTile && !topTile && !bottomTile) draw(edge.left);
   if (rightTile && !topTile && !bottomTile) draw(edge.right);
@@ -208,13 +104,18 @@ function drawEdges(
     !isTileType(x + 1, y - 1, currentTile)
   )
     draw(edge.ccvTR);
-  if (!bottomTile && !leftTile && !isTileType(x - 1, y + 1, currentTile))
+  if (
+    !adjacentIsCliff.leftBottom &&
+    !bottomTile &&
+    !leftTile &&
+    !isTileType(x - 1, y + 1, currentTile)
+  )
     draw(edge.ccvBL);
   if (
+    !adjacentIsCliff.rightBottom &&
     !bottomTile &&
     !rightTile &&
-    !isTileType(x + 1, y + 1, currentTile) &&
-    !adjacentIsCliff.rightBottom
+    !isTileType(x + 1, y + 1, currentTile)
   )
     draw(edge.ccvBR);
 }

@@ -74,18 +74,34 @@ export function useGameLoop(
     window.addEventListener("keydown", onKD);
     window.addEventListener("keyup", onKU);
 
-    const isLand = (t) => t !== TILE.WATER && !SOLID.has(t);
+    const isLand = (t) => t !== TILE.WATER && t !== TILE.WATERFALL && t !== TILE.RIVER && !SOLID.has(t);
     const isSolid = (px, py) => {
       const tx = Math.floor(px / TILE_SIZE),
         ty = Math.floor(py / TILE_SIZE);
       if (tx < 0 || ty < 0 || tx >= MAP_WIDTH || ty >= MAP_HEIGHT) return true;
       const tile = MAP[ty][tx];
-      if (tile === TILE.WATER) {
+      if (tile === TILE.WATER || tile === TILE.WATERFALL) {
         // The top edge of a water tile (land above) is walkable shore.
         const localY = py - ty * TILE_SIZE;
         if (ty > 0 && isLand(MAP[ty - 1][tx]) && localY < TILE_SIZE / 2)
           return false;
         return true;
+      }
+      if (tile === TILE.RIVER) {
+        // All four borders are walkable up to the tile midpoint.
+        const localX = px - tx * TILE_SIZE;
+        const localY = py - ty * TILE_SIZE;
+        const half = TILE_SIZE / 2;
+        const isLandOrCliff = (t) => t !== undefined && (isLand(t) || t === TILE.CLIFF);
+        if (isLandOrCliff(MAP[ty - 1]?.[tx]) && localY < half) return false;
+        if (isLandOrCliff(MAP[ty + 1]?.[tx]) && localY >= half) return false;
+        if (isLandOrCliff(MAP[ty]?.[tx - 1]) && localX < half) return false;
+        if (isLandOrCliff(MAP[ty]?.[tx + 1]) && localX >= half) return false;
+        return true;
+      }
+      if (tile === TILE.CLIFF) {
+        // Only the top cliff tile (no cliff above it) is walkable.
+        return MAP[ty - 1]?.[tx] === TILE.CLIFF;
       }
       if (SOLID.has(tile)) return true;
       if (MAP_OBJECTS[ty][tx] === OBJ.FENCE) {
@@ -141,11 +157,6 @@ export function useGameLoop(
     const findNear = (px, py) => {
       const cx = px + 8,
         cy = py + 8;
-      for (const b of BUILDINGS) {
-        const dx = cx - (b.x * TILE_SIZE + (b.spriteWidth * TILE_SIZE) / 2),
-          dy = cy - (b.y + b.spriteHeight) * TILE_SIZE;
-        if (Math.abs(dx) < 18 && dy > -4 && dy < 22) return b;
-      }
       for (const n of NPCS) {
         if (Math.abs(cx - n.x - 8) < 22 && Math.abs(cy - n.y - 8) < 22)
           return n;

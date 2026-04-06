@@ -21,7 +21,7 @@ export const BUILDINGS = [
     },
   },
   {
-    x: 27,
+    x: 24,
     y: 1,
     spriteWidth: 5,
     spriteHeight: 8,
@@ -100,20 +100,12 @@ export const MAP_OBJECTS = (() => {
 
   // ── CHERRY BLOSSOM GROVE ─────────────────────────────────────────────────────
   [
-    [3, 21],
-    [3, 24],
     [3, 36],
-    [4, 21],
     [4, 35],
-    [5, 21],
     [5, 36],
-    [6, 22],
     [6, 35],
-    [7, 24],
     [7, 36],
-    [8, 21],
     [8, 35],
-    [9, 22],
     [10, 36],
     // Scattered cherry trees elsewhere
     [11, 37],
@@ -124,13 +116,7 @@ export const MAP_OBJECTS = (() => {
 
   // ── DECORATIVE TREES ─────────────────────────────────────────────────────────
   [
-    [3, 20],
-    [4, 20],
-    [5, 20],
-    [9, 20],
     [11, 20],
-    [3, 26],
-    [4, 26],
     [9, 26],
     [11, 26],
     [15, 3],
@@ -185,6 +171,10 @@ export const MAP_OBJECTS = (() => {
   fill([19], range(9, 16), OBJ.FENCE);
   fill(range(20, 25), [15], OBJ.FENCE);
   set(19, 15, OBJ.FENCE); // top-right corner
+
+  fill(range(0, 5), [18], OBJ.FENCE);
+  fill([5], range(18, 22), OBJ.FENCE);
+  // fill([6], [22], OBJ.FENCE);
 
   return m;
 })();

@@ -35,9 +35,11 @@ export const MAP = (() => {
   fill(range(6, 7), range(9, 16), TILE.WATER);
   fill(range(7, 11), range(10, 13), TILE.WATER);
   fill(range(11, 14), range(0, 13), TILE.WATER);
+  fill(range(0, 2), range(16, 18), TILE.WATER);
 
   fill(range(1, 3), range(9, 16), TILE.CLIFF);
   fill(range(1, 4), range(9, 15), TILE.CLIFF);
+  fill(range(0, 2), range(10, 16), TILE.CLIFF);
   fill(range(0, 2), range(10, 14), TILE.RIVER);
   fill(range(2, 5), range(10, 14), TILE.WATERFALL);
   fill(range(9, 10), range(10, 13), TILE.PATH);

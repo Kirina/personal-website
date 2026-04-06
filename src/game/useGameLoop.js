@@ -264,6 +264,12 @@ export function useGameLoop(
             trees.push({ type: "ct", y: (y + 1) * TILE_SIZE, data: { x, y } });
           else if (obj === OBJ.TREE_PORTAL)
             trees.push({ type: "tp", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (obj === OBJ.MAPLE_TREE)
+            trees.push({ type: "mt", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (obj === OBJ.PINE_TREE)
+            trees.push({ type: "pt", y: (y + 1) * TILE_SIZE, data: { x, y } });
+          else if (obj === OBJ.BIRCH_TREE)
+            trees.push({ type: "bt", y: (y + 1) * TILE_SIZE, data: { x, y } });
           else if (obj === OBJ.FENCE)
             trees.push({ type: "f", y: (y + 1) * TILE_SIZE, data: { x, y } });
         }
@@ -303,6 +309,12 @@ export function useGameLoop(
           drawTree(ctx, e.data.x, e.data.y, SPRITES.cherryTreeTiles);
         else if (e.type === "tp")
           drawTree(ctx, e.data.x, e.data.y, SPRITES.treePortal);
+        else if (e.type === "mt")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.mapleTreeTiles);
+        else if (e.type === "pt")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.pineTreeTiles);
+        else if (e.type === "bt")
+          drawTree(ctx, e.data.x, e.data.y, SPRITES.birchTreeTiles);
         else if (e.type === "f")
           drawFlatObject(ctx, OBJ.FENCE, e.data.x, e.data.y, MAP_OBJECTS);
         else if (e.type === "b") drawBuilding(ctx, e.data);

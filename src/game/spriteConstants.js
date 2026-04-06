@@ -25,8 +25,18 @@ export const OBJ = {
   FLOWER: 3,
   FENCE: 4,
   TREE_PORTAL: 5,
+  MAPLE_TREE: 6,
+  PINE_TREE: 7,
+  BIRCH_TREE: 8,
 };
-export const OBJ_SOLID = new Set([OBJ.TREE, OBJ.CHERRY_TREE, OBJ.FENCE]);
+export const OBJ_SOLID = new Set([
+  OBJ.TREE,
+  OBJ.CHERRY_TREE,
+  OBJ.MAPLE_TREE,
+  OBJ.PINE_TREE,
+  OBJ.BIRCH_TREE,
+  OBJ.FENCE,
+]);
 
 // Sprite sheet locations
 
@@ -115,6 +125,9 @@ export const FLOWER_SRC = [16 * 18, 16 * 3];
 export const TREE = {
   mahogany: [0, 16 * 3],
   cherry: [16 * 8, 0],
+  birch: [16 * 6, 0],
+  pine: [16 * 3, 0],
+  maple: [16 * 3, 0],
   width: 16 * 2,
   height: 16 * 3,
 };

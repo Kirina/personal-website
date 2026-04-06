@@ -133,7 +133,10 @@ export const MAP_OBJECTS = (() => {
     [1, 28],
     [1, 36],
     [2, 37],
+    [3, 36],
   ].forEach(([y, x]) => set(y, x, OBJ.TREE));
+  fill([0], range(19, 29), OBJ.TREE);
+  set(0, 25, OBJ.BIRCH_TREE);
 
   // ── FLOWERS ──────────────────────────────────────────────────────────────────
   [

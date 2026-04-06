@@ -330,7 +330,12 @@ export function drawTree(ctx, x, y, spritesheet) {
     );
     return;
   }
-  const src = spritesheet === SPRITES.cherryTreeTiles ? TREE.cherry : TREE.mahogany;
+  const src =
+    spritesheet === SPRITES.cherryTreeTiles ? TREE.cherry :
+    spritesheet === SPRITES.birchTreeTiles ? TREE.birch :
+    spritesheet === SPRITES.pineTreeTiles ? TREE.pine :
+    spritesheet === SPRITES.mapleTreeTiles ? TREE.maple :
+    TREE.mahogany;
   ctx.drawImage(
     spritesheet,
     src[0],

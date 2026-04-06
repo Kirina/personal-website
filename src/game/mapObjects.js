@@ -21,8 +21,8 @@ export const BUILDINGS = [
     },
   },
   {
-    x: 24,
-    y: 1,
+    x: 26,
+    y: 4,
     spriteWidth: 5,
     spriteHeight: 8,
     spriteX: 16 * 6,
@@ -116,9 +116,6 @@ export const MAP_OBJECTS = (() => {
 
   // ── DECORATIVE TREES ─────────────────────────────────────────────────────────
   [
-    [11, 20],
-    [9, 26],
-    [11, 26],
     [15, 3],
     [16, 3],
     [22, 3],
@@ -172,8 +169,9 @@ export const MAP_OBJECTS = (() => {
   fill(range(20, 25), [15], OBJ.FENCE);
   set(19, 15, OBJ.FENCE); // top-right corner
 
-  fill(range(0, 5), [18], OBJ.FENCE);
-  fill([5], range(18, 22), OBJ.FENCE);
+  fill([3], [18], OBJ.FENCE);
+  fill(range(3, 5), [19], OBJ.FENCE);
+  fill([5], range(19, 22), OBJ.FENCE);
   // fill([6], [22], OBJ.FENCE);
 
   return m;

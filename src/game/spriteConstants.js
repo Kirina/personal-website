@@ -27,6 +27,8 @@ export const OBJ = {
 };
 export const OBJ_SOLID = new Set([OBJ.TREE, OBJ.CHERRY_TREE, OBJ.FENCE]);
 
+// Sprite sheet locations
+
 export const GRASS_DECOR = [
   [0, 0], // grass tuft 1
   [16, 0], // grass tuft 2
@@ -114,4 +116,10 @@ export const TREE = {
   cherry: [16 * 8, 0],
   width: 16 * 2,
   height: 16 * 3,
+};
+
+export const TREE_PORTAL = {
+  image: [0, 16 * 3],
+  width: [16 * 3],
+  height: [16 * 3],
 };

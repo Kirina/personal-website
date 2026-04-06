@@ -25,6 +25,7 @@ loadImg("propsTiles", "/assets/props/grass-water.png");
 loadImg("mahoganyTreeTiles", "/assets/props/mahogany-tree.png");
 loadImg("fenceTiles", "/assets/props/fence-wood.png");
 loadImg("cherryTreeTiles", "/assets/props/cherry-tree.png");
+loadImg("treePortal", "/assets/props/tree-portal.png");
 
 // Buildings (pre-composed)
 loadImg("home", "/assets/buildings/home.png");

@@ -70,12 +70,24 @@ function drawEdges(
     rightBottom: isCliffLike(x + 1, y + 1),
   };
 
-  const topTile = !isTileType(x, y - 1, currentTile) && !adjacentIsCliff.top;
+  const inBounds = (nx, ny) =>
+    nx >= 0 && nx < MAP_WIDTH && ny >= 0 && ny < MAP_HEIGHT;
+  const topTile =
+    inBounds(x, y - 1) &&
+    !isTileType(x, y - 1, currentTile) &&
+    !adjacentIsCliff.top;
   const bottomTile =
-    !isTileType(x, y + 1, currentTile) && !adjacentIsCliff.bottom;
-  const leftTile = !isTileType(x - 1, y, currentTile) && !adjacentIsCliff.left;
+    inBounds(x, y + 1) &&
+    !isTileType(x, y + 1, currentTile) &&
+    !adjacentIsCliff.bottom;
+  const leftTile =
+    inBounds(x - 1, y) &&
+    !isTileType(x - 1, y, currentTile) &&
+    !adjacentIsCliff.left;
   const rightTile =
-    !isTileType(x + 1, y, currentTile) && !adjacentIsCliff.right;
+    inBounds(x + 1, y) &&
+    !isTileType(x + 1, y, currentTile) &&
+    !adjacentIsCliff.right;
 
   // Convex corners (two adjacent corner sides are non-same-tile)
   if (topTile && leftTile) draw(edge.cvxTL);
@@ -91,6 +103,7 @@ function drawEdges(
 
   // Concave corners (all cardinal neighbors are same-tile, diagonal is not)
   if (
+    inBounds(x - 1, y - 1) &&
     !adjacentIsCliff.leftTop &&
     !topTile &&
     !leftTile &&
@@ -98,6 +111,7 @@ function drawEdges(
   )
     draw(edge.ccvTL);
   if (
+    inBounds(x + 1, y - 1) &&
     !adjacentIsCliff.rightTop &&
     !topTile &&
     !rightTile &&
@@ -105,6 +119,7 @@ function drawEdges(
   )
     draw(edge.ccvTR);
   if (
+    inBounds(x - 1, y + 1) &&
     !adjacentIsCliff.leftBottom &&
     !bottomTile &&
     !leftTile &&
@@ -112,6 +127,7 @@ function drawEdges(
   )
     draw(edge.ccvBL);
   if (
+    inBounds(x + 1, y + 1) &&
     !adjacentIsCliff.rightBottom &&
     !bottomTile &&
     !rightTile &&
